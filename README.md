@@ -1,4 +1,4 @@
-# silicord
+# silicord v0.2.2
 
 A Discord bot framework for Lua with **Luau-inspired syntax** — built for Roblox developers who want to write Discord bots using familiar patterns like `task.wait()`, Signals, and method chaining.
 
@@ -113,9 +113,10 @@ end)
 | `message:Reply(text)` | Reply to the message |
 | `message:Reply(embed)` | Reply with an embed only |
 | `message:Reply(text, embed)` | Reply with text and an embed |
+| `message:Reply(text, embed, components)` | Reply with text, embed, and buttons/menus |
 | `message:React("👍")` | Add a reaction to the message |
 | `message:Delete()` | Delete the message |
-| `message:GetGuild()` | Returns a Guild object for the server |
+| `message:GetGuild()` | Returns a Guild object (uses cache automatically) |
 | `message:SendPrivateMessage(text)` | DM the message author |
 
 ```lua
@@ -142,7 +143,7 @@ message.author.bot       -- true if the author is a bot
 
 ---
 
-## Interaction Object (Slash Commands)
+## Interaction Object (Slash Commands & Components)
 
 Interactions have the same methods as Message with one difference — `Reply` sends an interaction response instead of a regular message.
 
@@ -150,9 +151,11 @@ Interactions have the same methods as Message with one difference — `Reply` se
 interaction:Reply("Hello!")
 interaction:Reply(embed)
 interaction:Reply("Text", embed)
+interaction:Update("Updated content")   -- update the original message (for buttons)
 interaction:GetGuild()
 interaction:SendPrivateMessage("Hey!")
 interaction.args        -- table of slash command arguments keyed by name
+interaction.values      -- selected values from a select menu
 interaction.author      -- the user who triggered the command
 ```
 
@@ -189,6 +192,100 @@ message:Reply(embed)
 -- or with text:
 message:Reply("Here's some info:", embed)
 ```
+
+---
+
+## Components (Buttons & Select Menus)
+
+```lua
+-- Send a message with buttons
+client:CreateCommand("vote", function(message, args)
+    local row = silicord.ActionRow(
+        silicord.Button({ label = "Yes",  style = "success",   custom_id = "vote_yes"  }),
+        silicord.Button({ label = "No",   style = "danger",    custom_id = "vote_no"   }),
+        silicord.Button({ label = "Skip", style = "secondary", custom_id = "vote_skip" })
+    )
+    message:Reply("Cast your vote!", nil, { row })
+end)
+
+-- Handle button clicks by custom_id
+client:CreateComponent("vote_yes", function(interaction)
+    interaction:Update("You voted **Yes**! ✅")
+end)
+
+client:CreateComponent("vote_no", function(interaction)
+    interaction:Update("You voted **No**! ❌")
+end)
+```
+
+**Button styles:** `primary`, `secondary`, `success`, `danger`, `link`
+
+```lua
+-- Select menu
+client:CreateCommand("color", function(message, args)
+    local row = silicord.ActionRow(
+        silicord.SelectMenu({
+            custom_id   = "color_pick",
+            placeholder = "Pick a color",
+            options = {
+                { label = "Red",   value = "red",   description = "A warm color"    },
+                { label = "Blue",  value = "blue",  description = "A cool color"    },
+                { label = "Green", value = "green", description = "A natural color" }
+            }
+        })
+    )
+    message:Reply("Choose a color:", nil, { row })
+end)
+
+client:CreateComponent("color_pick", function(interaction)
+    -- interaction.values[1] is the selected value
+    interaction:Update("You picked: **" .. interaction.values[1] .. "**")
+end)
+```
+
+---
+
+## Middleware
+
+Middleware hooks run before every command. Return `false` to block the command entirely.
+
+```lua
+-- Cooldown hook (3 seconds per command per user)
+local cooldowns = {}
+client:AddMiddleware(function(ctx, cmd, args)
+    local key = ctx.author.id .. ":" .. cmd
+    if os.time() - (cooldowns[key] or 0) < 3 then
+        ctx:Reply("Slow down! Wait 3 seconds between commands.")
+        return false
+    end
+    cooldowns[key] = os.time()
+end)
+
+-- Admin-only hook
+client:AddMiddleware(function(ctx, cmd, args)
+    if cmd == "ban" then
+        -- check permissions here, return false to block
+    end
+end)
+```
+
+---
+
+## Caching
+
+silicord automatically caches guild and user data received from Discord gateway events. `message:GetGuild()` checks the cache first before ever making an HTTP request.
+
+```lua
+client.cache.guilds   -- table of guild data keyed by guild ID
+client.cache.users    -- table of user data keyed by user ID
+client.cache.bot_user -- the bot's own user object
+```
+
+---
+
+## Sharding
+
+Sharding is fully automatic. silicord fetches the recommended shard count from Discord on startup and spawns the correct number of gateway connections with the required delay between each. You don't need to configure anything.
 
 ---
 
@@ -255,6 +352,17 @@ local client = silicord.Connect({
     app_id = "your app id here"
 })
 
+-- Cooldown middleware
+local cooldowns = {}
+client:AddMiddleware(function(ctx, cmd, args)
+    local key = ctx.author.id .. ":" .. cmd
+    if os.time() - (cooldowns[key] or 0) < 3 then
+        ctx:Reply("Wait 3 seconds between commands.")
+        return false
+    end
+    cooldowns[key] = os.time()
+end)
+
 -- !ping
 client:CreateCommand("ping", function(message, args)
     message:Reply("Pong!")
@@ -269,24 +377,21 @@ client:CreateCommand("say", function(message, args)
     message:Reply(args.raw)
 end)
 
--- !embed
-client:CreateCommand("embed", function(message, args)
-    local embed = silicord.Embed({
-        title       = "silicord",
-        description = "A Discord bot framework for Lua.",
-        color       = "#5865F2",
-        footer      = "Built with silicord"
-    })
-    message:Reply(embed)
+-- !vote (buttons)
+client:CreateCommand("vote", function(message, args)
+    local row = silicord.ActionRow(
+        silicord.Button({ label = "Yes", style = "success", custom_id = "vote_yes" }),
+        silicord.Button({ label = "No",  style = "danger",  custom_id = "vote_no"  })
+    )
+    message:Reply("Cast your vote!", nil, { row })
 end)
 
--- !ban @user spamming
-client:CreateCommand("ban", function(message, args)
-    local guild = message:GetGuild()
-    if guild and args[1] then
-        guild:BanMember(args[1], args.raw:match("^%S+%s+(.+)$"))
-        message:Reply("User banned.")
-    end
+client:CreateComponent("vote_yes", function(interaction)
+    interaction:Update("You voted **Yes**! ✅")
+end)
+
+client:CreateComponent("vote_no", function(interaction)
+    interaction:Update("You voted **No**! ❌")
 end)
 
 -- /ping (slash)
@@ -312,3 +417,12 @@ MIT — see [LICENSE](LICENSE)
 - [LuaRocks page](https://luarocks.org/modules/mrpandolaofficial-art/silicord)
 - [GitHub](https://github.com/mrpandolaofficial-art/silicord)
 - [Discord Developer Portal](https://discord.com/developers/applications)
+
+---
+
+## Version History
+
+- **v0.2.2** — Automatic sharding, buttons & select menus (`silicord.Button`, `silicord.SelectMenu`, `silicord.ActionRow`, `client:CreateComponent`), rate limit bucket controller with auto-retry, state caching (`client.cache`), middleware system (`client:AddMiddleware`)
+- **v0.2.0** — Guild object (`message:GetGuild()`), reactions (`message:React()`), embeds (`silicord.Embed()`), DMs (`message:SendPrivateMessage()`), prefix command arguments (`args[1]`, `args.raw`), slash commands (`client:CreateSlashCommand()`), `task.wait()` support in commands
+- **v0.1.0** — silicord prototype released, basic `:Reply()` syntax, WebSocket gateway connection
+- **v0.0.2** — Fixed WebSocket frame masking
