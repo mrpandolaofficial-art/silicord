@@ -1,4 +1,4 @@
-# silicord v0.3.2
+# silicord v0.3.3
 
 A Discord bot framework for Lua with **Luau-inspired syntax** — built for Roblox developers who want to write Discord bots using familiar patterns like `task.wait()`, Signals, and method chaining.
 
@@ -538,6 +538,7 @@ MIT — see [LICENSE](LICENSE)
 
 ## Version History
 
+- **v0.3.3** - Added custom error handling for bots
 - **v0.3.2** - Introduced token validation before startup
 - **v0.3.1** - Introduced better error messages for easier debugging.
 - **v0.3.0** — Member object with `:Kick()`, `:Ban()`, `:Timeout()`, `:RemoveTimeout()`, `:GiveRole()`, `:RemoveRole()`, `:SetNickname()`, `:ResetNickname()`, `:SendDM()`; expanded channel types (stage, forum, media, announcement, category); channel/role editing and deletion; scheduled events (`guild:CreateEvent()`, `:EditEvent()`, `:DeleteEvent()`, `:GetEvents()`); `message:Send()` for no-ping messages; `message:Edit()` to edit bot messages; `message:Pin()` / `message:Unpin()`; `message:GetMember()` and `interaction:GetMember()`; `guild:Edit()` to edit the server; removed confusing internal gateway log

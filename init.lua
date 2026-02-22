@@ -923,7 +923,26 @@ local function start_shard(token, shard_id, total_shards, client)
                                     if result == false then allowed = false break end
                                 end
                                 if allowed then
-                                    silicord.task.spawn(client._commands[cmd_name].callback, msg, args)
+                                    silicord.task.spawn(function()
+                                        local ok, err = pcall(client._commands[cmd_name].callback, msg, args)
+                                        if not ok then
+                                            -- Detect missing argument errors vs general errors
+                                            local error_type = "CommandError"
+                                            if args.raw == "" and (tostring(err):find("nil") or tostring(err):find("index")) then
+                                                error_type = "MissingArgument"
+                                            end
+                                            if #client.OnError._listeners > 0 then
+                                                client.OnError:Fire(error_type, msg, cmd_name, tostring(err))
+                                            else
+                                                log_error(string.format("[%s] in !%s: %s", error_type, cmd_name, tostring(err)))
+                                            end
+                                        end
+                                    end)
+                                end
+                            elseif cmd_name then
+                                -- A prefix was used but no command matched
+                                if #client.OnError._listeners > 0 then
+                                    client.OnError:Fire("CommandNotFound", msg, cmd_name)
                                 end
                             else
                                 msg.content = body
@@ -945,14 +964,36 @@ local function start_shard(token, shard_id, total_shards, client)
                                     if result == false then allowed = false break end
                                 end
                                 if allowed then
-                                    silicord.task.spawn(client._slash[cmd_name].callback, interaction, interaction.args)
+                                    silicord.task.spawn(function()
+                                        local ok, err = pcall(client._slash[cmd_name].callback, interaction, interaction.args)
+                                        if not ok then
+                                            if #client.OnError._listeners > 0 then
+                                                client.OnError:Fire("SlashCommandError", interaction, cmd_name, tostring(err))
+                                            else
+                                                log_error(string.format("[SlashCommandError] in /%s: %s", cmd_name, tostring(err)))
+                                            end
+                                        end
+                                    end)
+                                end
+                            elseif cmd_name then
+                                if #client.OnError._listeners > 0 then
+                                    client.OnError:Fire("UnknownInteraction", interaction, cmd_name)
                                 end
                             end
                         end
                         if itype == 3 then
                             local custom_id = data.d.data and data.d.data.custom_id
                             if custom_id and client._components[custom_id] then
-                                silicord.task.spawn(client._components[custom_id], interaction)
+                                silicord.task.spawn(function()
+                                    local ok, err = pcall(client._components[custom_id], interaction)
+                                    if not ok then
+                                        if #client.OnError._listeners > 0 then
+                                            client.OnError:Fire("ComponentError", interaction, custom_id, tostring(err))
+                                        else
+                                            log_error(string.format("[ComponentError] in %s: %s", custom_id, tostring(err)))
+                                        end
+                                    end
+                                end)
                             end
                         end
                     end
@@ -983,6 +1024,7 @@ function silicord.Connect(config)
 
     local client = {
         OnMessage     = Signal.new(),
+        OnError       = Signal.new(),
         Token         = token,
         _prefix       = prefix,
         _conns        = {},
