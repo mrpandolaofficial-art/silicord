@@ -1,4 +1,4 @@
-# silicord v0.3.3
+# silicord v0.3.4
 
 A Discord bot framework for Lua with **Luau-inspired syntax** — built for Roblox developers who want to write Discord bots using familiar patterns like `task.wait()`, Signals, and method chaining.
 
@@ -296,6 +296,49 @@ end)
 
 ---
 
+## Error Handling
+
+silicord fires a `client.OnError` signal whenever something goes wrong during command or interaction dispatch. If you don't connect a handler, silicord falls back to printing the error to the console so nothing fails silently.
+
+```lua
+client.OnError:Connect(function(error_type, ctx, name, detail)
+    if error_type == "CommandNotFound" then
+        ctx:Reply("❌ Unknown command `!" .. name .. "`.")
+
+    elseif error_type == "MissingArgument" then
+        ctx:Reply("❌ Missing argument for `!" .. name .. "`.")
+
+    elseif error_type == "CommandError" then
+        ctx:Reply("❌ Something went wrong running `!" .. name .. "`.")
+        print("CommandError in !" .. name .. ": " .. detail)
+
+    elseif error_type == "SlashCommandError" then
+        ctx:Reply("❌ Something went wrong running `/" .. name .. "`.")
+
+    elseif error_type == "ComponentError" then
+        print("ComponentError in " .. name .. ": " .. detail)
+
+    elseif error_type == "UnknownInteraction" then
+        ctx:Reply("❌ Unknown slash command.")
+    end
+end)
+```
+
+### Error types
+
+| Error type | When it fires | `ctx` type | `name` | `detail` |
+|---|---|---|---|---|
+| `CommandNotFound` | User typed a prefix command with no registered handler | Message | command name | nil |
+| `MissingArgument` | Command callback errored and args were empty | Message | command name | Lua error string |
+| `CommandError` | Command callback threw a runtime error | Message | command name | Lua error string |
+| `SlashCommandError` | Slash command callback threw a runtime error | Interaction | command name | Lua error string |
+| `ComponentError` | Component callback threw a runtime error | Interaction | custom_id | Lua error string |
+| `UnknownInteraction` | A slash command was triggered with no registered handler | Interaction | command name | nil |
+
+The `ctx` argument is always either a Message or Interaction object, so you can always call `:Reply()` on it to send feedback directly to the user.
+
+---
+
 ## Guild Object
 
 Get a guild from any message or interaction:
@@ -463,6 +506,18 @@ client:AddMiddleware(function(ctx, cmd, args)
     cooldowns[key] = os.time()
 end)
 
+-- Error handling
+client.OnError:Connect(function(error_type, ctx, name, detail)
+    if error_type == "CommandNotFound" then
+        ctx:Reply("❌ Unknown command `!" .. name .. "`.")
+    elseif error_type == "MissingArgument" then
+        ctx:Reply("❌ Missing argument for `!" .. name .. "`.")
+    elseif error_type == "CommandError" or error_type == "SlashCommandError" then
+        ctx:Reply("❌ Something went wrong. Please try again.")
+        print("[Error] " .. name .. ": " .. detail)
+    end
+end)
+
 -- !ping
 client:CreateCommand("ping", function(message, args)
     message:Reply("Pong!")
@@ -531,14 +586,15 @@ MIT — see [LICENSE](LICENSE)
 ## Links
 
 - [LuaRocks page](https://luarocks.org/modules/mrpandolaofficial-art/silicord)
-- [GitHub](https://github.com/mrpandolaofficial-art/silicord)
+- [GitHub](https://github.com/mrpandolaofficial/silicord)
 - [Discord Developer Portal](https://discord.com/developers/applications)
 
 ---
 
 ## Version History
 
-- **v0.3.3** - Added custom error handling for bots
+- **v0.3.4** - Minor bug fixes and improvements
+- **v0.3.3** - Added custom error handling for bots via `client.OnError`
 - **v0.3.2** - Introduced token validation before startup
 - **v0.3.1** - Introduced better error messages for easier debugging.
 - **v0.3.0** — Member object with `:Kick()`, `:Ban()`, `:Timeout()`, `:RemoveTimeout()`, `:GiveRole()`, `:RemoveRole()`, `:SetNickname()`, `:ResetNickname()`, `:SendDM()`; expanded channel types (stage, forum, media, announcement, category); channel/role editing and deletion; scheduled events (`guild:CreateEvent()`, `:EditEvent()`, `:DeleteEvent()`, `:GetEvents()`); `message:Send()` for no-ping messages; `message:Edit()` to edit bot messages; `message:Pin()` / `message:Unpin()`; `message:GetMember()` and `interaction:GetMember()`; `guild:Edit()` to edit the server; removed confusing internal gateway log
