@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>silicord — Discord bots for Roblox devs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <canvas id="bg-canvas"></canvas>
+  <div class="noise"></div>
+
+  <nav class="nav" id="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">
+        <span class="logo-bracket">[</span>silicord<span class="logo-bracket">]</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html" class="nav-active">Home</a></li>
+        <li><a href="quickstart.html">Quickstart</a></li>
+        <li><a href="docs.html">Docs</a></li>
+        <li><a href="https://luarocks.org/modules/mrpandolaofficial-art/silicord" target="_blank" class="nav-cta">Install</a></li>
+      </ul>
+      <button class="hamburger" id="hamburger" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+    <div class="mobile-menu" id="mobile-menu">
+      <a href="index.html">Home</a>
+      <a href="quickstart.html">Quickstart</a>
+      <a href="docs.html">Docs</a>
+      <a href="https://luarocks.org/modules/mrpandolaofficial-art/silicord" target="_blank">Install</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" id="hero">
+    <div class="hero-badge reveal">
+      <span class="badge-dot"></span>
+      v0.4.0 — Stop Fixing. Start Building.
+    </div>
+    <h1 class="hero-title reveal">
+      Discord bots,<br />
+      <span class="gradient-text">Roblox style.</span>
+    </h1>
+    <p class="hero-sub reveal">
+      silicord is a LuaRocks framework that lets Roblox developers build
+      Discord bots using familiar syntax — <code>task.wait()</code>, Signals,
+      method chaining, and all.
+    </p>
+    <div class="hero-actions reveal">
+      <a href="quickstart.html" class="btn btn-primary">Get Started</a>
+      <a href="https://github.com/mrpandolaofficial-art/silicord" target="_blank" class="btn btn-ghost">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 .5C5.65.5.5 5.65.5 12a11.5 11.5 0 0 0 7.86 10.94c.57.1.78-.25.78-.55v-1.93C5.73 21.1 5.06 19 5.06 19c-.52-1.32-1.27-1.67-1.27-1.67-1.04-.71.08-.7.08-.7 1.15.08 1.75 1.18 1.75 1.18 1.02 1.75 2.67 1.24 3.32.95.1-.74.4-1.24.72-1.53-2.54-.29-5.21-1.27-5.21-5.65 0-1.25.45-2.27 1.18-3.07-.12-.29-.51-1.45.11-3.02 0 0 .96-.31 3.15 1.17a10.94 10.94 0 0 1 5.72 0c2.19-1.48 3.15-1.17 3.15-1.17.62 1.57.23 2.73.11 3.02.74.8 1.18 1.82 1.18 3.07 0 4.39-2.68 5.36-5.23 5.64.41.35.78 1.05.78 2.12v3.14c0 .3.21.66.79.55A11.5 11.5 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5z"/>
+        </svg>
+        GitHub
+      </a>
+    </div>
+    <div class="hero-install reveal">
+      <div class="install-box" id="install-box">
+        <span class="install-prompt">$</span>
+        <span class="install-cmd">luarocks install silicord</span>
+        <button class="copy-btn" id="copy-btn" title="Copy">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="9" y="9" width="13" height="13" rx="2"/>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div class="hero-scroll-hint">
+      <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="features" id="features">
+    <div class="section-label reveal">Why silicord?</div>
+    <h2 class="section-title reveal">Built different.</h2>
+    <div class="features-grid">
+
+      <div class="feature-card reveal" data-delay="0">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/>
+          </svg>
+        </div>
+        <h3>Roblox-style syntax</h3>
+        <p>Use <code>task.wait()</code>, method chaining, and familiar patterns right inside your bot code. Zero learning curve if you already know Roblox.</p>
+      </div>
+
+      <div class="feature-card reveal" data-delay="100">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <polyline points="13 2 13 9 20 9"/><polygon points="7.86 2 3 2 3 22 21 22 21 8.14"/>
+          </svg>
+        </div>
+        <h3>Prefix &amp; Slash commands</h3>
+        <p>Define both classic prefix commands and modern slash commands with the same clean API. Arguments, options, and types just work.</p>
+      </div>
+
+      <div class="feature-card reveal" data-delay="200">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
+          </svg>
+        </div>
+        <h3>Rich component system</h3>
+        <p>Buttons, select menus, action rows, and embeds — all first-class citizens. Build interactive bots with no boilerplate.</p>
+      </div>
+
+      <div class="feature-card reveal" data-delay="300">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+          </svg>
+        </div>
+        <h3>Automatic sharding</h3>
+        <p>silicord detects the recommended shard count from Discord and spawns the right connections automatically. No configuration needed.</p>
+      </div>
+
+      <div class="feature-card reveal" data-delay="400">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+        </div>
+        <h3>Middleware &amp; rate limits</h3>
+        <p>Hook into every command with <code>AddMiddleware</code>. Built-in rate limit bucket controller with automatic retry.</p>
+      </div>
+
+      <div class="feature-card reveal" data-delay="500">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+          </svg>
+        </div>
+        <h3>Smart caching</h3>
+        <p>Guild and user data is cached from gateway events. <code>GetGuild()</code> hits the cache first — fast by default.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- COMPARE -->
+  <section class="compare">
+    <div class="section-label reveal">vs. the rest</div>
+    <h2 class="section-title reveal">Made for Roblox devs.</h2>
+    <div class="compare-table reveal">
+      <table>
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th class="highlight">silicord</th>
+            <th>Discordia</th>
+            <th>Others</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Roblox-style syntax</td><td class="highlight">✅</td><td>❌</td><td>❌</td></tr>
+          <tr><td><code>task.wait()</code> support</td><td class="highlight">✅</td><td>❌</td><td>❌</td></tr>
+          <tr><td>Method chaining</td><td class="highlight">✅</td><td>Partial</td><td>Varies</td></tr>
+          <tr><td>LuaRocks install</td><td class="highlight">✅</td><td>✅</td><td>Varies</td></tr>
+          <tr><td>Automatic sharding</td><td class="highlight">✅</td><td>Manual</td><td>Varies</td></tr>
+          <tr><td>Built-in rate limiting</td><td class="highlight">✅</td><td>✅</td><td>Varies</td></tr>
+          <tr><td>Buttons &amp; Select Menus</td><td class="highlight">✅</td><td>✅</td><td>Varies</td></tr>
+          <tr><td>Middleware system</td><td class="highlight">✅</td><td>❌</td><td>❌</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- CTA STRIP -->
+  <section class="cta-section">
+    <div class="cta-glow"></div>
+    <h2 class="cta-title reveal">Ready to build?</h2>
+    <p class="cta-sub reveal">One command and you're in.</p>
+    <div class="cta-install reveal">
+      <div class="install-box">
+        <span class="install-prompt">$</span>
+        <span class="install-cmd">luarocks install silicord</span>
+        <button class="copy-btn copy-cta" title="Copy">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="9" y="9" width="13" height="13" rx="2"/>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div class="cta-links reveal">
+      <a href="quickstart.html" class="btn btn-primary">Quickstart Guide</a>
+      <a href="docs.html" class="btn btn-ghost">Browse Docs</a>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-logo"><span class="logo-bracket">[</span>silicord<span class="logo-bracket">]</span></div>
+      <p class="footer-copy">MIT License — made by mrpandolaofficial-art</p>
+      <div class="footer-links">
+        <a href="https://luarocks.org/modules/mrpandolaofficial-art/silicord" target="_blank">LuaRocks</a>
+        <a href="https://github.com/mrpandolaofficial-art/silicord" target="_blank">GitHub</a>
+        <a href="https://discord.com/developers/applications" target="_blank">Dev Portal</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

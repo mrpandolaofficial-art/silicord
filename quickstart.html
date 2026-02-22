@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quickstart — silicord</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <canvas id="bg-canvas"></canvas>
+  <div class="noise"></div>
+
+  <nav class="nav" id="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">
+        <span class="logo-bracket">[</span>silicord<span class="logo-bracket">]</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="quickstart.html" class="nav-active">Quickstart</a></li>
+        <li><a href="docs.html">Docs</a></li>
+        <li><a href="https://luarocks.org/modules/mrpandolaofficial-art/silicord" target="_blank" class="nav-cta">Install</a></li>
+      </ul>
+      <button class="hamburger" id="hamburger" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+    <div class="mobile-menu" id="mobile-menu">
+      <a href="index.html">Home</a>
+      <a href="quickstart.html">Quickstart</a>
+      <a href="docs.html">Docs</a>
+      <a href="https://luarocks.org/modules/mrpandolaofficial-art/silicord" target="_blank">Install</a>
+    </div>
+  </nav>
+
+  <!-- PAGE HERO -->
+  <section class="page-hero">
+    <div class="section-label reveal">Get up and running</div>
+    <h1 class="page-title reveal">Quickstart</h1>
+    <p class="page-sub reveal">From zero to a live Discord bot in under a minute.</p>
+  </section>
+
+  <!-- REQUIREMENTS -->
+  <section class="qs-section">
+    <h2 class="qs-heading reveal">Requirements</h2>
+    <p class="qs-desc reveal">These are installed automatically when you install silicord via LuaRocks, so you normally don't need to worry about them.</p>
+    <div class="req-grid reveal">
+      <div class="req-card">
+        <span class="req-name">Lua</span>
+        <span class="req-ver">5.1+</span>
+      </div>
+      <div class="req-card">
+        <span class="req-name">luasocket</span>
+        <span class="req-ver">auto</span>
+      </div>
+      <div class="req-card">
+        <span class="req-name">luasec</span>
+        <span class="req-ver">auto</span>
+      </div>
+      <div class="req-card">
+        <span class="req-name">copas</span>
+        <span class="req-ver">auto</span>
+      </div>
+      <div class="req-card">
+        <span class="req-name">dkjson</span>
+        <span class="req-ver">auto</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEPS -->
+  <section class="qs-section">
+    <h2 class="qs-heading reveal">Installation &amp; Setup</h2>
+    <div class="qs-steps">
+
+      <div class="qs-step reveal">
+        <div class="qs-num">01</div>
+        <div class="qs-content">
+          <h3>Install via LuaRocks</h3>
+          <p>Run this in your terminal. All dependencies are pulled in automatically.</p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">bash</span>
+              <button class="copy-code" data-code="luarocks install silicord">copy</button>
+            </div>
+            <pre><code>luarocks install silicord</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="qs-step reveal">
+        <div class="qs-num">02</div>
+        <div class="qs-content">
+          <h3>Create your bot file</h3>
+          <p>Make a new file called <code>bot.lua</code> and paste this. It's a fully working bot already.</p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">lua</span>
+              <button class="copy-code" data-code='local silicord = require("silicord")
+
+local client = silicord.Connect({
+    token  = "your bot token here",
+    prefix = "!"
+})
+
+client:CreateCommand("ping", function(message, args)
+    message:Reply("Pong!")
+end)
+
+silicord.Run()'>copy</button>
+            </div>
+            <pre><code class="lua"><span class="kw">local</span> silicord = <span class="fn">require</span>(<span class="str">"silicord"</span>)
+
+<span class="kw">local</span> client = silicord.<span class="fn">Connect</span>({
+    token  = <span class="str">"your bot token here"</span>,
+    prefix = <span class="str">"!"</span>
+})
+
+client:<span class="fn">CreateCommand</span>(<span class="str">"ping"</span>, <span class="kw">function</span>(message, args)
+    message:<span class="fn">Reply</span>(<span class="str">"Pong!"</span>)
+<span class="kw">end</span>)
+
+silicord.<span class="fn">Run</span>()</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="qs-step reveal">
+        <div class="qs-num">03</div>
+        <div class="qs-content">
+          <h3>Get your bot token</h3>
+          <p>Head to the <a href="https://discord.com/developers/applications" target="_blank" class="inline-link">Discord Developer Portal</a>, create an application, add a Bot, and copy the token. Paste it into your <code>bot.lua</code>.</p>
+          <div class="tip-box">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Never share your bot token. Store it in an environment variable or a config file that's excluded from version control.
+          </div>
+        </div>
+      </div>
+
+      <div class="qs-step reveal">
+        <div class="qs-num">04</div>
+        <div class="qs-content">
+          <h3>Run it</h3>
+          <p>Start your bot with a single command.</p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">bash</span>
+              <button class="copy-code" data-code="lua bot.lua">copy</button>
+            </div>
+            <pre><code>lua bot.lua</code></pre>
+          </div>
+          <p class="after-step">Your bot is now online. Type <code>!ping</code> in any channel it has access to and it will reply <strong>Pong!</strong></p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- CONNECT CONFIG -->
+  <section class="qs-section">
+    <h2 class="qs-heading reveal">silicord.Connect( config )</h2>
+    <p class="qs-desc reveal">The entry point for every silicord bot. Pass a config table with these fields:</p>
+    <div class="compare-table reveal">
+      <table>
+        <thead>
+          <tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>token</code></td><td>string</td><td>✅ yes</td><td>Your Discord bot token</td></tr>
+          <tr><td><code>prefix</code></td><td>string</td><td>no</td><td>Command prefix (default: <code>"!"</code>)</td></tr>
+          <tr><td><code>app_id</code></td><td>string</td><td>no</td><td>Application ID — only needed for slash commands</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="code-block reveal" style="margin-top:1.5rem">
+      <div class="code-header">
+        <span class="code-lang">lua</span>
+        <button class="copy-code" data-code='local client = silicord.Connect({
+    token  = "your token",
+    prefix = "!",
+    app_id = "your application id"  -- only needed for slash commands
+})'>copy</button>
+      </div>
+      <pre><code class="lua"><span class="kw">local</span> client = silicord.<span class="fn">Connect</span>({
+    token  = <span class="str">"your token"</span>,
+    prefix = <span class="str">"!"</span>,
+    app_id = <span class="str">"your application id"</span>  <span class="cmt">-- only needed for slash commands</span>
+})</code></pre>
+    </div>
+  </section>
+
+  <!-- FULL EXAMPLE -->
+  <section class="qs-section">
+    <h2 class="qs-heading reveal">Full example</h2>
+    <p class="qs-desc reveal">A more complete bot showing prefix commands, slash commands, embeds, buttons, middleware, and events all together.</p>
+    <div class="code-block reveal">
+      <div class="code-header">
+        <span class="code-lang">lua</span>
+        <button class="copy-code" data-code='local silicord = require("silicord")
+
+local client = silicord.Connect({
+    token  = "your token here",
+    prefix = "!",
+    app_id = "your app id here"
+})
+
+-- Cooldown middleware
+local cooldowns = {}
+client:AddMiddleware(function(ctx, cmd, args)
+    local key = ctx.author.id .. ":" .. cmd
+    if os.time() - (cooldowns[key] or 0) < 3 then
+        ctx:Reply("Wait 3 seconds between commands.")
+        return false
+    end
+    cooldowns[key] = os.time()
+end)
+
+-- !ping
+client:CreateCommand("ping", function(message, args)
+    message:Reply("Pong!")
+end)
+
+-- !timeout @user 60 spamming
+client:CreateCommand("timeout", function(message, args)
+    local member = message:GetMember()
+    member:Timeout(60, args.raw)
+    message:Reply("User timed out for 60 seconds.")
+end)
+
+-- !vote (buttons)
+client:CreateCommand("vote", function(message, args)
+    local row = silicord.ActionRow(
+        silicord.Button({ label = "Yes", style = "success", custom_id = "vote_yes" }),
+        silicord.Button({ label = "No",  style = "danger",  custom_id = "vote_no"  })
+    )
+    message:Reply("Cast your vote!", nil, { row })
+end)
+
+client:CreateComponent("vote_yes", function(interaction)
+    interaction:Update("You voted Yes! ✅")
+end)
+
+client:CreateComponent("vote_no", function(interaction)
+    interaction:Update("You voted No! ❌")
+end)
+
+-- /ping (slash)
+client:CreateSlashCommand("ping", {
+    description = "Replies with pong"
+}, function(interaction, args)
+    interaction:Reply("Pong!")
+end)
+
+silicord.Run()'>copy</button>
+      </div>
+      <pre><code class="lua"><span class="kw">local</span> silicord = <span class="fn">require</span>(<span class="str">"silicord"</span>)
+
+<span class="kw">local</span> client = silicord.<span class="fn">Connect</span>({
+    token  = <span class="str">"your token here"</span>,
+    prefix = <span class="str">"!"</span>,
+    app_id = <span class="str">"your app id here"</span>
+})
+
+<span class="cmt">-- Cooldown middleware</span>
+<span class="kw">local</span> cooldowns = {}
+client:<span class="fn">AddMiddleware</span>(<span class="kw">function</span>(ctx, cmd, args)
+    <span class="kw">local</span> key = ctx.author.id .. <span class="str">":"</span> .. cmd
+    <span class="kw">if</span> os.<span class="fn">time</span>() - (cooldowns[key] <span class="kw">or</span> <span class="num">0</span>) &lt; <span class="num">3</span> <span class="kw">then</span>
+        ctx:<span class="fn">Reply</span>(<span class="str">"Wait 3 seconds between commands."</span>)
+        <span class="kw">return false</span>
+    <span class="kw">end</span>
+    cooldowns[key] = os.<span class="fn">time</span>()
+<span class="kw">end</span>)
+
+<span class="cmt">-- !ping</span>
+client:<span class="fn">CreateCommand</span>(<span class="str">"ping"</span>, <span class="kw">function</span>(message, args)
+    message:<span class="fn">Reply</span>(<span class="str">"Pong!"</span>)
+<span class="kw">end</span>)
+
+<span class="cmt">-- !vote (buttons)</span>
+client:<span class="fn">CreateCommand</span>(<span class="str">"vote"</span>, <span class="kw">function</span>(message, args)
+    <span class="kw">local</span> row = silicord.<span class="fn">ActionRow</span>(
+        silicord.<span class="fn">Button</span>({ label = <span class="str">"Yes"</span>, style = <span class="str">"success"</span>, custom_id = <span class="str">"vote_yes"</span> }),
+        silicord.<span class="fn">Button</span>({ label = <span class="str">"No"</span>,  style = <span class="str">"danger"</span>,  custom_id = <span class="str">"vote_no"</span>  })
+    )
+    message:<span class="fn">Reply</span>(<span class="str">"Cast your vote!"</span>, <span class="kw">nil</span>, { row })
+<span class="kw">end</span>)
+
+client:<span class="fn">CreateComponent</span>(<span class="str">"vote_yes"</span>, <span class="kw">function</span>(interaction)
+    interaction:<span class="fn">Update</span>(<span class="str">"You voted Yes! ✅"</span>)
+<span class="kw">end</span>)
+
+<span class="cmt">-- /ping (slash)</span>
+client:<span class="fn">CreateSlashCommand</span>(<span class="str">"ping"</span>, {
+    description = <span class="str">"Replies with pong"</span>
+}, <span class="kw">function</span>(interaction, args)
+    interaction:<span class="fn">Reply</span>(<span class="str">"Pong!"</span>)
+<span class="kw">end</span>)
+
+silicord.<span class="fn">Run</span>()</code></pre>
+    </div>
+  </section>
+
+  <!-- NEXT STEPS -->
+  <section class="qs-section next-steps-section">
+    <h2 class="qs-heading reveal">Next steps</h2>
+    <div class="next-steps reveal">
+      <a href="docs.html#embeds" class="next-card">
+        <div class="next-icon">📦</div>
+        <div>
+          <h4>Embeds</h4>
+          <p>Rich message formatting with colors, fields, thumbnails, and more.</p>
+        </div>
+        <svg class="next-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+      <a href="docs.html#components" class="next-card">
+        <div class="next-icon">🎛️</div>
+        <div>
+          <h4>Buttons &amp; Select Menus</h4>
+          <p>Build interactive bots with clickable components and dropdown menus.</p>
+        </div>
+        <svg class="next-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+      <a href="docs.html#guild" class="next-card">
+        <div class="next-icon">🏰</div>
+        <div>
+          <h4>Guild &amp; Member management</h4>
+          <p>Kick, ban, timeout, give roles, and manage your whole server.</p>
+        </div>
+        <svg class="next-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-logo"><span class="logo-bracket">[</span>silicord<span class="logo-bracket">]</span></div>
+      <p class="footer-copy">MIT License — made by mrpandolaofficial-art</p>
+      <div class="footer-links">
+        <a href="https://luarocks.org/modules/mrpandolaofficial-art/silicord" target="_blank">LuaRocks</a>
+        <a href="https://github.com/mrpandolaofficial-art/silicord" target="_blank">GitHub</a>
+        <a href="https://discord.com/developers/applications" target="_blank">Dev Portal</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
