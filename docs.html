@@ -90,10 +90,10 @@
         <div class="code-block">
           <div class="code-header"><span class="code-lang">lua</span><button class="copy-code" data-code='-- Basic command
 client:CreateCommand("ping", function(message, args)
-    message:Reply("Pong!")
+    message:Reply("Pong")
 end)
 
--- With arguments — user types: !say hello world
+-- With arguments: !say hello world
 client:CreateCommand("say", function(message, args)
     -- args[1] = "hello", args[2] = "world"
     -- args.raw = "hello world"
@@ -113,7 +113,7 @@ client:<span class="fn">CreateCommand</span>(<span class="str">"ping"</span>, <s
     message:<span class="fn">Reply</span>(<span class="str">"Pong!"</span>)
 <span class="kw">end</span>)
 
-<span class="cmt">-- With arguments — user types: !say hello world</span>
+<span class="cmt">-- With arguments,: !say hello world</span>
 client:<span class="fn">CreateCommand</span>(<span class="str">"say"</span>, <span class="kw">function</span>(message, args)
     <span class="cmt">-- args[1] = "hello", args[2] = "world"</span>
     <span class="cmt">-- args.raw = "hello world"</span>
@@ -581,7 +581,7 @@ silicord.task.<span class="fn">spawn</span>(<span class="kw">function</span>()
           </div>
           <div class="changelog-item">
             <div class="changelog-ver">v0.1.0</div>
-            <div class="changelog-body">Initial release — basic <code>:Reply()</code> syntax, WebSocket gateway connection.</div>
+            <div class="changelog-body">Initial release: basic <code>:Reply()</code> syntax, WebSocket gateway connection.</div>
           </div>
           <div class="changelog-item">
             <div class="changelog-ver">v0.0.2</div>
@@ -596,7 +596,7 @@ silicord.task.<span class="fn">spawn</span>(<span class="kw">function</span>()
   <footer class="footer">
     <div class="footer-inner">
       <div class="footer-logo"><span class="logo-bracket">[</span>silicord<span class="logo-bracket">]</span></div>
-      <p class="footer-copy">MIT License — made by mrpandolaofficial-art</p>
+      <p class="footer-copy">MIT License: made by mrpandolaofficial-art</p>
       <div class="footer-links">
         <a href="https://luarocks.org/modules/mrpandolaofficial-art/silicord" target="_blank">LuaRocks</a>
         <a href="https://github.com/mrpandolaofficial-art/silicord" target="_blank">GitHub</a>
