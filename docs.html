@@ -9,6 +9,72 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
+  <style>
+    /* ── Version / Status badges ─────────────────────────────── */
+    .badge {
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      padding: 2px 8px;
+      border-radius: 4px;
+      vertical-align: middle;
+      margin-left: 8px;
+      line-height: 1.6;
+      position: relative;
+      top: -1px;
+    }
+    .badge-new {
+      background: rgba(87, 242, 135, 0.15);
+      color: #57f287;
+      border: 1px solid rgba(87, 242, 135, 0.35);
+    }
+    .badge-deprecated {
+      background: rgba(254, 231, 92, 0.13);
+      color: #fee75c;
+      border: 1px solid rgba(254, 231, 92, 0.35);
+    }
+
+    /* ── Deprecated block callout ────────────────────────────── */
+    .deprecated-box {
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+      background: rgba(254, 231, 92, 0.07);
+      border: 1px solid rgba(254, 231, 92, 0.28);
+      border-left: 3px solid #fee75c;
+      border-radius: 8px;
+      padding: 0.85rem 1.1rem;
+      margin: 1.2rem 0 0.5rem;
+      font-size: 0.92rem;
+      color: rgba(255,255,255,0.82);
+      line-height: 1.55;
+    }
+    .deprecated-box svg { flex-shrink: 0; margin-top: 2px; color: #fee75c; }
+    .deprecated-box code { color: #fee75c; background: rgba(254,231,92,0.12); padding: 1px 5px; border-radius: 3px; }
+    .deprecated-box strong { color: #fee75c; }
+
+    /* ── v1.0.0 new-feature callout ─────────────────────────── */
+    .new-box {
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+      background: rgba(87, 242, 135, 0.07);
+      border: 1px solid rgba(87, 242, 135, 0.28);
+      border-left: 3px solid #57f287;
+      border-radius: 8px;
+      padding: 0.85rem 1.1rem;
+      margin: 1.2rem 0 0.5rem;
+      font-size: 0.92rem;
+      color: rgba(255,255,255,0.82);
+      line-height: 1.55;
+    }
+    .new-box svg { flex-shrink: 0; margin-top: 2px; color: #57f287; }
+
+    /* ── method-row badge alignment ─────────────────────────── */
+    .method-row > div:first-child { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; }
+  </style>
 </head>
 <body>
   <canvas id="bg-canvas"></canvas>
@@ -61,6 +127,7 @@
           <a href="#member" class="sidebar-link">Member</a>
           <a href="#guild" class="sidebar-link">Guild</a>
           <a href="#embeds" class="sidebar-link">Embeds</a>
+          <a href="#color3" class="sidebar-link">Color3</a>
         </div>
         <div class="sidebar-group">
           <div class="sidebar-group-label">Components</div>
@@ -68,6 +135,10 @@
         </div>
         <div class="sidebar-group">
           <div class="sidebar-group-label">Advanced</div>
+          <a href="#datastore" class="sidebar-link">DataStore</a>
+          <a href="#signal" class="sidebar-link">Signal</a>
+          <a href="#stdlib" class="sidebar-link">Std Libraries</a>
+          <a href="#collection" class="sidebar-link">CollectionService</a>
           <a href="#middleware" class="sidebar-link">Middleware</a>
           <a href="#caching" class="sidebar-link">Caching</a>
           <a href="#sharding" class="sidebar-link">Sharding</a>
@@ -80,7 +151,9 @@
     <!-- MAIN CONTENT -->
     <main class="docs-main">
 
-      <!-- COMMANDS -->
+      <!-- ═══════════════════════════════════════════════════════
+           COMMANDS
+      ════════════════════════════════════════════════════════ -->
       <section class="doc-section" id="commands">
         <div class="doc-section-label">Core</div>
         <h2 class="doc-section-title">Commands</h2>
@@ -90,7 +163,7 @@
         <div class="code-block">
           <div class="code-header"><span class="code-lang">lua</span><button class="copy-code" data-code='-- Basic command
 client:CreateCommand("ping", function(message, args)
-    message:Reply("Pong")
+    message:Reply("Pong!")
 end)
 
 -- With arguments: !say hello world
@@ -113,7 +186,7 @@ client:<span class="fn">CreateCommand</span>(<span class="str">"ping"</span>, <s
     message:<span class="fn">Reply</span>(<span class="str">"Pong!"</span>)
 <span class="kw">end</span>)
 
-<span class="cmt">-- With arguments,: !say hello world</span>
+<span class="cmt">-- With arguments: !say hello world</span>
 client:<span class="fn">CreateCommand</span>(<span class="str">"say"</span>, <span class="kw">function</span>(message, args)
     <span class="cmt">-- args[1] = "hello", args[2] = "world"</span>
     <span class="cmt">-- args.raw = "hello world"</span>
@@ -152,9 +225,26 @@ end)'>copy</button></div>
     interaction:<span class="fn">Reply</span>(<span class="str">"Banned "</span> .. args.user .. <span class="str">". Reason: "</span> .. (args.reason <span class="kw">or</span> <span class="str">"none"</span>))
 <span class="kw">end</span>)</code></pre>
         </div>
+
+        <h3 class="doc-sub" style="margin-top:2.5rem">Error Handling</h3>
+        <p class="doc-p">Listen to <code>client.OnError</code> to catch command errors without crashing the bot. The signal fires with an error type string, the context object, the command name, and the error message.</p>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">lua</span><button class="copy-code" data-code='-- Error types: "CommandError", "MissingArgument", "CommandNotFound",
+--               "SlashCommandError", "UnknownInteraction", "ComponentError"
+client.OnError:Connect(function(err_type, ctx, cmd, err_msg)
+    print("[" .. err_type .. "] /" .. cmd .. " — " .. tostring(err_msg))
+end)'>copy</button></div>
+          <pre><code class="lua"><span class="cmt">-- Error types: "CommandError", "MissingArgument", "CommandNotFound",</span>
+<span class="cmt">--               "SlashCommandError", "UnknownInteraction", "ComponentError"</span>
+client.OnError:<span class="fn">Connect</span>(<span class="kw">function</span>(err_type, ctx, cmd, err_msg)
+    <span class="fn">print</span>(<span class="str">"["</span> .. err_type .. <span class="str">"] /"</span> .. cmd .. <span class="str">" — "</span> .. <span class="fn">tostring</span>(err_msg))
+<span class="kw">end</span>)</code></pre>
+        </div>
       </section>
 
-      <!-- MESSAGE -->
+      <!-- ═══════════════════════════════════════════════════════
+           MESSAGE
+      ════════════════════════════════════════════════════════ -->
       <section class="doc-section" id="message">
         <div class="doc-section-label">Core</div>
         <h2 class="doc-section-title">Message Object</h2>
@@ -176,6 +266,7 @@ end)'>copy</button></div>
           <div class="method-row"><div><code>message:GetGuild()</code></div><div>Returns a Guild object (cached)</div></div>
           <div class="method-row"><div><code>message:GetMember()</code></div><div>Returns a Member object for the author</div></div>
           <div class="method-row"><div><code>message:SendPrivateMessage(text)</code></div><div>DM the message author</div></div>
+          <div class="method-row"><div><code>message:SendPrivateMessage(text, embed)</code></div><div>DM with an embed</div></div>
         </div>
 
         <h3 class="doc-sub" style="margin-top:2rem">message.author</h3>
@@ -189,7 +280,9 @@ message.author.bot       <span class="cmt">-- true if the author is a bot</span>
         </div>
       </section>
 
-      <!-- INTERACTION -->
+      <!-- ═══════════════════════════════════════════════════════
+           INTERACTION
+      ════════════════════════════════════════════════════════ -->
       <section class="doc-section" id="interaction">
         <div class="doc-section-label">Core</div>
         <h2 class="doc-section-title">Interaction Object</h2>
@@ -204,13 +297,19 @@ message.author.bot       <span class="cmt">-- true if the author is a bot</span>
           <div class="method-row"><div><code>interaction:GetGuild()</code></div><div>Returns a Guild object</div></div>
           <div class="method-row"><div><code>interaction:GetMember()</code></div><div>Returns a Member object</div></div>
           <div class="method-row"><div><code>interaction:SendPrivateMessage(text)</code></div><div>DM the user who triggered this</div></div>
+          <div class="method-row"><div><code>interaction:SendPrivateMessage(text, embed)</code></div><div>DM with an embed</div></div>
           <div class="method-row"><div><code>interaction.args</code></div><div>Slash command arguments keyed by name</div></div>
           <div class="method-row"><div><code>interaction.values</code></div><div>Selected values from a select menu</div></div>
           <div class="method-row"><div><code>interaction.author</code></div><div>The user who triggered the interaction</div></div>
+          <div class="method-row"><div><code>interaction.custom_id</code></div><div>The custom_id of the component that fired</div></div>
+          <div class="method-row"><div><code>interaction.guild_id</code></div><div>ID of the guild where the interaction occurred</div></div>
+          <div class="method-row"><div><code>interaction.channel_id</code></div><div>ID of the channel where it occurred</div></div>
         </div>
       </section>
 
-      <!-- MEMBER -->
+      <!-- ═══════════════════════════════════════════════════════
+           MEMBER
+      ════════════════════════════════════════════════════════ -->
       <section class="doc-section" id="member">
         <div class="doc-section-label">Objects</div>
         <h2 class="doc-section-title">Member Object</h2>
@@ -234,7 +333,8 @@ local member = guild:GetMember(user_id)'>copy</button></div>
           <div class="method-row"><div><code>member:RemoveRole(role_id)</code></div><div>Remove a role from the member</div></div>
           <div class="method-row"><div><code>member:SetNickname(nick)</code></div><div>Set a nickname</div></div>
           <div class="method-row"><div><code>member:ResetNickname()</code></div><div>Reset to username</div></div>
-          <div class="method-row"><div><code>member:SendDM(text, embed)</code></div><div>DM the member</div></div>
+          <div class="method-row"><div><code>member:SendDM(text)</code></div><div>DM the member</div></div>
+          <div class="method-row"><div><code>member:SendDM(text, embed)</code></div><div>DM with an embed</div></div>
         </div>
 
         <h3 class="doc-sub" style="margin-top:2rem">member properties</h3>
@@ -252,7 +352,9 @@ member.user      <span class="cmt">-- raw Discord user object</span></code></pre
         </div>
       </section>
 
-      <!-- GUILD -->
+      <!-- ═══════════════════════════════════════════════════════
+           GUILD
+      ════════════════════════════════════════════════════════ -->
       <section class="doc-section" id="guild">
         <div class="doc-section-label">Objects</div>
         <h2 class="doc-section-title">Guild Object</h2>
@@ -269,12 +371,12 @@ member.user      <span class="cmt">-- raw Discord user object</span></code></pre
           <div class="method-row"><div><code>guild:CreateChannel(name, kind, options)</code></div><div>Create a channel</div></div>
           <div class="method-row"><div><code>guild:EditChannel(channel_id, options)</code></div><div>Edit a channel</div></div>
           <div class="method-row"><div><code>guild:DeleteChannel(channel_id)</code></div><div>Delete a channel</div></div>
-          <div class="method-row"><div><code>guild:CreateRole(name, color, permissions)</code></div><div>Create a role</div></div>
-          <div class="method-row"><div><code>guild:EditRole(role_id, options)</code></div><div>Edit a role</div></div>
+          <div class="method-row"><div><code>guild:CreateRole(name, color, permissions)</code></div><div>Create a role — color accepts hex string, integer, or Color3 object</div></div>
+          <div class="method-row"><div><code>guild:EditRole(role_id, options)</code></div><div>Edit a role — options.color accepts hex, integer, or Color3</div></div>
           <div class="method-row"><div><code>guild:DeleteRole(role_id)</code></div><div>Delete a role</div></div>
-          <div class="method-row"><div><code>guild:GetMembers(limit)</code></div><div>List of Member objects</div></div>
+          <div class="method-row"><div><code>guild:GetMembers(limit)</code></div><div>List of Member objects (max 1000)</div></div>
           <div class="method-row"><div><code>guild:GetMember(user_id)</code></div><div>Single Member by ID</div></div>
-          <div class="method-row"><div><code>guild:GetRandomMember()</code></div><div>Random Member object</div></div>
+          <div class="method-row"><div><code>guild:GetRandomMember()</code></div><div>Random Member object (from first 100)</div></div>
           <div class="method-row"><div><code>guild:GetChannels()</code></div><div>All channels</div></div>
           <div class="method-row"><div><code>guild:GetRoles()</code></div><div>All roles</div></div>
           <div class="method-row"><div><code>guild:KickMember(user_id, reason)</code></div><div>Kick by ID</div></div>
@@ -319,95 +421,225 @@ guild:<span class="fn">CreateChannel</span>(<span class="str">"general"</span>, 
     slowmode  = <span class="num">5</span>
 })</code></pre>
         </div>
-      </section>
 
-      <!-- EMBEDS -->
-      <section class="doc-section" id="embeds">
-        <div class="doc-section-label">Objects</div>
-        <h2 class="doc-section-title">Embeds</h2>
+        <h3 class="doc-sub" style="margin-top:2rem">Scheduled Events</h3>
         <div class="code-block">
-          <div class="code-header"><span class="code-lang">lua</span><button class="copy-code" data-code='local embed = silicord.Embed({
-    title       = "My Embed",
-    description = "This is the description.",
-    color       = "#5865F2",
-    url         = "https://example.com",
-    timestamp   = os.date("!%Y-%m-%dT%H:%M:%SZ"),
-
-    author      = "Author Name",
-    author_icon = "https://example.com/icon.png",
-    author_url  = "https://example.com",
-
-    footer      = "Footer text",
-    footer_icon = "https://example.com/icon.png",
-
-    image       = "https://example.com/image.png",
-    thumbnail   = "https://example.com/thumb.png",
-
-    fields = {
-        { name = "Field 1", value = "Value 1", inline = true  },
-        { name = "Field 2", value = "Value 2", inline = true  },
-        { name = "Field 3", value = "Value 3", inline = false }
-    }
-})
-
-message:Reply(embed)
-message:Reply("Here\'s some info:", embed)'>copy</button></div>
-          <pre><code class="lua"><span class="kw">local</span> embed = silicord.<span class="fn">Embed</span>({
-    title       = <span class="str">"My Embed"</span>,
-    description = <span class="str">"This is the description."</span>,
-    color       = <span class="str">"#5865F2"</span>,
-    url         = <span class="str">"https://example.com"</span>,
-    timestamp   = os.<span class="fn">date</span>(<span class="str">"!%Y-%m-%dT%H:%M:%SZ"</span>),
-
-    author      = <span class="str">"Author Name"</span>,
-    author_icon = <span class="str">"https://example.com/icon.png"</span>,
-    author_url  = <span class="str">"https://example.com"</span>,
-
-    footer      = <span class="str">"Footer text"</span>,
-    footer_icon = <span class="str">"https://example.com/icon.png"</span>,
-
-    image       = <span class="str">"https://example.com/image.png"</span>,
-    thumbnail   = <span class="str">"https://example.com/thumb.png"</span>,
-
-    fields = {
-        { name = <span class="str">"Field 1"</span>, value = <span class="str">"Value 1"</span>, inline = <span class="kw">true</span>  },
-        { name = <span class="str">"Field 2"</span>, value = <span class="str">"Value 2"</span>, inline = <span class="kw">true</span>  },
-        { name = <span class="str">"Field 3"</span>, value = <span class="str">"Value 3"</span>, inline = <span class="kw">false</span> }
-    }
-})
-
-message:<span class="fn">Reply</span>(embed)
-message:<span class="fn">Reply</span>(<span class="str">"Here's some info:"</span>, embed)</code></pre>
+          <div class="code-header"><span class="code-lang">lua</span><button class="copy-code" data-code='guild:CreateEvent({
+    name       = "Game Night",
+    description = "Monthly game night!",
+    type       = "external",           -- "stage", "voice", or "external"
+    location   = "Discord Stage",      -- for "external" type
+    start_time = "2025-08-01T20:00:00Z",
+    end_time   = "2025-08-01T22:00:00Z"
+})'>copy</button></div>
+          <pre><code class="lua">guild:<span class="fn">CreateEvent</span>({
+    name        = <span class="str">"Game Night"</span>,
+    description = <span class="str">"Monthly game night!"</span>,
+    type        = <span class="str">"external"</span>,   <span class="cmt">-- "stage", "voice", or "external"</span>
+    location    = <span class="str">"Discord Stage"</span>, <span class="cmt">-- for "external" type</span>
+    start_time  = <span class="str">"2025-08-01T20:00:00Z"</span>,
+    end_time    = <span class="str">"2025-08-01T22:00:00Z"</span>
+})</code></pre>
         </div>
       </section>
 
-      <!-- COMPONENTS -->
+      <!-- ═══════════════════════════════════════════════════════
+           EMBEDS
+      ════════════════════════════════════════════════════════ -->
+      <section class="doc-section" id="embeds">
+        <div class="doc-section-label">Objects</div>
+        <h2 class="doc-section-title">Embeds</h2>
+
+        <!-- NEW: Instance.new OOP API -->
+        <h3 class="doc-sub">OOP API <span class="badge badge-new">v1.0.0+</span></h3>
+        <p class="doc-p">The preferred way to build embeds in v1.0.0+. Use <code>silicord.Instance.new("Embed")</code> for a clean, chainable builder. Pass a <code>Color3</code> object directly to <code>.Color</code> — no <code>:ToInt()</code> required.</p>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">lua</span><button class="copy-code" data-code='local embed = silicord.Instance.new("Embed")
+embed.Title       = "My Embed"
+embed.Description = "This is the description."
+embed.Color       = silicord.Color3.fromRGB(88, 101, 242)  -- no :ToInt() needed
+embed.Url         = "https://example.com"
+embed.Timestamp   = os.date("!%Y-%m-%dT%H:%M:%SZ")
+embed.Author      = "Author Name"
+embed.AuthorIcon  = "https://example.com/icon.png"
+embed.AuthorUrl   = "https://example.com"
+embed.Footer      = "Footer text"
+embed.FooterIcon  = "https://example.com/icon.png"
+embed.Image       = "https://example.com/image.png"
+embed.Thumbnail   = "https://example.com/thumb.png"
+embed:AddField("Field 1", "Value 1", true)
+embed:AddField("Field 2", "Value 2", true)
+embed:AddField("Field 3", "Value 3", false)
+
+message:Reply("Here is info:", embed:Build())'>copy</button></div>
+          <pre><code class="lua"><span class="kw">local</span> embed = silicord.Instance.<span class="fn">new</span>(<span class="str">"Embed"</span>)
+embed.Title       = <span class="str">"My Embed"</span>
+embed.Description = <span class="str">"This is the description."</span>
+embed.Color       = silicord.Color3.<span class="fn">fromRGB</span>(<span class="num">88</span>, <span class="num">101</span>, <span class="num">242</span>)  <span class="cmt">-- no :ToInt() needed</span>
+embed.Url         = <span class="str">"https://example.com"</span>
+embed.Timestamp   = os.<span class="fn">date</span>(<span class="str">"!%Y-%m-%dT%H:%M:%SZ"</span>)
+embed.Author      = <span class="str">"Author Name"</span>
+embed.AuthorIcon  = <span class="str">"https://example.com/icon.png"</span>
+embed.AuthorUrl   = <span class="str">"https://example.com"</span>
+embed.Footer      = <span class="str">"Footer text"</span>
+embed.FooterIcon  = <span class="str">"https://example.com/icon.png"</span>
+embed.Image       = <span class="str">"https://example.com/image.png"</span>
+embed.Thumbnail   = <span class="str">"https://example.com/thumb.png"</span>
+embed:<span class="fn">AddField</span>(<span class="str">"Field 1"</span>, <span class="str">"Value 1"</span>, <span class="kw">true</span>)
+embed:<span class="fn">AddField</span>(<span class="str">"Field 2"</span>, <span class="str">"Value 2"</span>, <span class="kw">true</span>)
+embed:<span class="fn">AddField</span>(<span class="str">"Field 3"</span>, <span class="str">"Value 3"</span>, <span class="kw">false</span>)
+
+message:<span class="fn">Reply</span>(<span class="str">"Here is info:"</span>, embed:<span class="fn">Build</span>())</code></pre>
+        </div>
+
+        <div class="method-table" style="margin-top:1rem">
+          <div class="method-row header"><div>Property / Method</div><div>Description</div></div>
+          <div class="method-row"><div><code>embed.Title</code></div><div>Embed title string</div></div>
+          <div class="method-row"><div><code>embed.Description</code></div><div>Body text</div></div>
+          <div class="method-row"><div><code>embed.Color</code></div><div>Hex string, integer, or <code>Color3</code> object</div></div>
+          <div class="method-row"><div><code>embed.Url</code></div><div>URL for the title link</div></div>
+          <div class="method-row"><div><code>embed.Timestamp</code></div><div>ISO 8601 timestamp string</div></div>
+          <div class="method-row"><div><code>embed.Author / .AuthorIcon / .AuthorUrl</code></div><div>Author section</div></div>
+          <div class="method-row"><div><code>embed.Footer / .FooterIcon</code></div><div>Footer section</div></div>
+          <div class="method-row"><div><code>embed.Image / .Thumbnail</code></div><div>Image URLs</div></div>
+          <div class="method-row"><div><code>embed:AddField(name, value, inline)</code></div><div>Add a field; returns the embed for chaining</div></div>
+          <div class="method-row"><div><code>embed:Build()</code></div><div>Returns the final table to pass to <code>:Reply()</code> etc.</div></div>
+        </div>
+
+        <!-- DEPRECATED: table syntax -->
+        <h3 class="doc-sub" style="margin-top:2.5rem">Table syntax <span class="badge badge-deprecated">deprecated</span></h3>
+        <div class="deprecated-box">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <div><strong>Deprecated since v1.0.0.</strong> <code>silicord.Embed({ ... })</code> still works but prints a runtime warning. Migrate to <code>silicord.Instance.new("Embed")</code> shown above. This helper will be removed in a future major version.</div>
+        </div>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">lua</span><button class="copy-code" data-code='-- ⚠ DEPRECATED — use silicord.Instance.new("Embed") instead
+local embed = silicord.Embed({
+    title       = "My Embed",
+    description = "This is the description.",
+    color       = "#5865F2",
+    fields = {
+        { name = "Field 1", value = "Value 1", inline = true },
+    }
+})
+message:Reply(embed)'>copy</button></div>
+          <pre><code class="lua"><span class="cmt">-- ⚠ DEPRECATED — use silicord.Instance.new("Embed") instead</span>
+<span class="kw">local</span> embed = silicord.<span class="fn">Embed</span>({
+    title       = <span class="str">"My Embed"</span>,
+    description = <span class="str">"This is the description."</span>,
+    color       = <span class="str">"#5865F2"</span>,
+    fields = {
+        { name = <span class="str">"Field 1"</span>, value = <span class="str">"Value 1"</span>, inline = <span class="kw">true</span> },
+    }
+})
+message:<span class="fn">Reply</span>(embed)</code></pre>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════════════
+           COLOR3
+      ════════════════════════════════════════════════════════ -->
+      <section class="doc-section" id="color3">
+        <div class="doc-section-label">Objects</div>
+        <h2 class="doc-section-title">Color3</h2>
+        <p class="doc-p">A Roblox-style color class. In v1.0.0+, <code>Color3</code> objects can be passed directly to any <code>.Color</code> / <code>color</code> field — you no longer need to call <code>:ToInt()</code> yourself.</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">lua</span><button class="copy-code" data-code='-- Create from RGB values (0–255)
+local c = silicord.Color3.fromRGB(88, 101, 242)
+
+-- Create from a hex string
+local c = silicord.Color3.fromHex("#5865F2")
+
+-- Use directly in an embed (v1.0.0+, no :ToInt() needed)
+local embed = silicord.Instance.new("Embed")
+embed.Color = silicord.Color3.fromHex("#57F287")  -- just assign it
+
+-- Use in guild:CreateRole
+guild:CreateRole("Moderator", silicord.Color3.fromRGB(255, 165, 0))
+
+-- Still works: get the raw integer
+local int = c:ToInt()   -- 5793522'>copy</button></div>
+          <pre><code class="lua"><span class="cmt">-- Create from RGB values (0–255)</span>
+<span class="kw">local</span> c = silicord.Color3.<span class="fn">fromRGB</span>(<span class="num">88</span>, <span class="num">101</span>, <span class="num">242</span>)
+
+<span class="cmt">-- Create from a hex string</span>
+<span class="kw">local</span> c = silicord.Color3.<span class="fn">fromHex</span>(<span class="str">"#5865F2"</span>)
+
+<span class="cmt">-- Use directly in an embed (v1.0.0+, no :ToInt() needed)</span>
+<span class="kw">local</span> embed = silicord.Instance.<span class="fn">new</span>(<span class="str">"Embed"</span>)
+embed.Color = silicord.Color3.<span class="fn">fromHex</span>(<span class="str">"#57F287"</span>)
+
+<span class="cmt">-- Use in guild:CreateRole</span>
+guild:<span class="fn">CreateRole</span>(<span class="str">"Moderator"</span>, silicord.Color3.<span class="fn">fromRGB</span>(<span class="num">255</span>, <span class="num">165</span>, <span class="num">0</span>))
+
+<span class="cmt">-- Still works: get the raw integer</span>
+<span class="kw">local</span> int = c:<span class="fn">ToInt</span>()   <span class="cmt">-- 5793522</span></code></pre>
+        </div>
+
+        <div class="method-table" style="margin-top:1rem">
+          <div class="method-row header"><div>Method / Property</div><div>Description</div></div>
+          <div class="method-row"><div><code>Color3.fromRGB(r, g, b)</code></div><div>Construct from 0–255 RGB components</div></div>
+          <div class="method-row"><div><code>Color3.fromHex(hex)</code></div><div>Construct from a hex string (<code>"#RRGGBB"</code> or <code>"RRGGBB"</code>)</div></div>
+          <div class="method-row"><div><code>color.r / .g / .b</code></div><div>Individual channel values (0–255)</div></div>
+          <div class="method-row"><div><code>color:ToInt()</code></div><div>Returns the packed 24-bit integer (still available, rarely needed)</div></div>
+        </div>
+
+        <div class="new-box" style="margin-top:1rem">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <div><strong>v1.0.0+:</strong> All color fields in silicord (Embed, <code>guild:CreateRole</code>, <code>guild:EditRole</code>) now call an internal <code>resolve_color()</code> helper that automatically handles <code>Color3</code> objects, hex strings, and raw integers. You never need <code>:ToInt()</code> in normal usage.</div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════════════
+           COMPONENTS
+      ════════════════════════════════════════════════════════ -->
       <section class="doc-section" id="components">
         <div class="doc-section-label">Components</div>
         <h2 class="doc-section-title">Buttons &amp; Select Menus</h2>
 
-        <h3 class="doc-sub">Buttons</h3>
-        <p class="doc-p">Button styles: <code>primary</code>, <code>secondary</code>, <code>success</code>, <code>danger</code>, <code>link</code>.</p>
+        <!-- NEW: OOP API -->
+        <h3 class="doc-sub">OOP API <span class="badge badge-new">v1.0.0+</span></h3>
+        <p class="doc-p">Use <code>silicord.Instance.new()</code> to build components and action rows with a chainable, object-oriented style.</p>
+
         <div class="code-block">
           <div class="code-header"><span class="code-lang">lua</span><button class="copy-code" data-code='client:CreateCommand("vote", function(message, args)
-    local row = silicord.ActionRow(
-        silicord.Button({ label = "Yes",  style = "success",   custom_id = "vote_yes"  }),
-        silicord.Button({ label = "No",   style = "danger",    custom_id = "vote_no"   }),
-        silicord.Button({ label = "Skip", style = "secondary", custom_id = "vote_skip" })
-    )
-    message:Reply("Cast your vote!", nil, { row })
+    local yes = silicord.Instance.new("Button")
+    yes.Label    = "Yes"
+    yes.Style    = "success"
+    yes.CustomId = "vote_yes"
+
+    local no = silicord.Instance.new("Button")
+    no.Label    = "No"
+    no.Style    = "danger"
+    no.CustomId = "vote_no"
+
+    local row = silicord.Instance.new("ActionRow")
+    row:Add(yes)
+    row:Add(no)
+
+    message:Reply("Cast your vote!", nil, { row:Build() })
 end)
 
 client:CreateComponent("vote_yes", function(interaction)
     interaction:Update("You voted Yes! ✅")
 end)'>copy</button></div>
           <pre><code class="lua">client:<span class="fn">CreateCommand</span>(<span class="str">"vote"</span>, <span class="kw">function</span>(message, args)
-    <span class="kw">local</span> row = silicord.<span class="fn">ActionRow</span>(
-        silicord.<span class="fn">Button</span>({ label = <span class="str">"Yes"</span>,  style = <span class="str">"success"</span>,   custom_id = <span class="str">"vote_yes"</span>  }),
-        silicord.<span class="fn">Button</span>({ label = <span class="str">"No"</span>,   style = <span class="str">"danger"</span>,    custom_id = <span class="str">"vote_no"</span>   }),
-        silicord.<span class="fn">Button</span>({ label = <span class="str">"Skip"</span>, style = <span class="str">"secondary"</span>, custom_id = <span class="str">"vote_skip"</span> })
-    )
-    message:<span class="fn">Reply</span>(<span class="str">"Cast your vote!"</span>, <span class="kw">nil</span>, { row })
+    <span class="kw">local</span> yes = silicord.Instance.<span class="fn">new</span>(<span class="str">"Button"</span>)
+    yes.Label    = <span class="str">"Yes"</span>
+    yes.Style    = <span class="str">"success"</span>
+    yes.CustomId = <span class="str">"vote_yes"</span>
+
+    <span class="kw">local</span> no = silicord.Instance.<span class="fn">new</span>(<span class="str">"Button"</span>)
+    no.Label    = <span class="str">"No"</span>
+    no.Style    = <span class="str">"danger"</span>
+    no.CustomId = <span class="str">"vote_no"</span>
+
+    <span class="kw">local</span> row = silicord.Instance.<span class="fn">new</span>(<span class="str">"ActionRow"</span>)
+    row:<span class="fn">Add</span>(yes)
+    row:<span class="fn">Add</span>(no)
+
+    message:<span class="fn">Reply</span>(<span class="str">"Cast your vote!"</span>, <span class="kw">nil</span>, { row:<span class="fn">Build</span>() })
 <span class="kw">end</span>)
 
 client:<span class="fn">CreateComponent</span>(<span class="str">"vote_yes"</span>, <span class="kw">function</span>(interaction)
@@ -415,52 +647,359 @@ client:<span class="fn">CreateComponent</span>(<span class="str">"vote_yes"</spa
 <span class="kw">end</span>)</code></pre>
         </div>
 
-        <h3 class="doc-sub" style="margin-top:2.5rem">Select Menus</h3>
+        <h3 class="doc-sub" style="margin-top:2rem">Button properties</h3>
+        <div class="method-table">
+          <div class="method-row header"><div>Property</div><div>Description</div></div>
+          <div class="method-row"><div><code>button.Label</code></div><div>Button text (default: <code>"Button"</code>)</div></div>
+          <div class="method-row"><div><code>button.Style</code></div><div><code>"primary"</code>, <code>"secondary"</code>, <code>"success"</code>, <code>"danger"</code>, <code>"link"</code></div></div>
+          <div class="method-row"><div><code>button.CustomId</code></div><div>ID matched by <code>client:CreateComponent()</code></div></div>
+          <div class="method-row"><div><code>button.Url</code></div><div>URL for <code>"link"</code>-style buttons</div></div>
+          <div class="method-row"><div><code>button.Emoji</code></div><div>Emoji name string (e.g. <code>"👍"</code>)</div></div>
+          <div class="method-row"><div><code>button.Disabled</code></div><div><code>true</code> to disable the button (default: <code>false</code>)</div></div>
+          <div class="method-row"><div><code>button:Build()</code></div><div>Returns the raw component table</div></div>
+        </div>
+
+        <h3 class="doc-sub" style="margin-top:2.5rem">Select Menus <span class="badge badge-new">v1.0.0+</span></h3>
         <div class="code-block">
           <div class="code-header"><span class="code-lang">lua</span><button class="copy-code" data-code='client:CreateCommand("color", function(message, args)
-    local row = silicord.ActionRow(
-        silicord.SelectMenu({
-            custom_id   = "color_pick",
-            placeholder = "Pick a color",
-            options = {
-                { label = "Red",   value = "red",   description = "A warm color"    },
-                { label = "Blue",  value = "blue",  description = "A cool color"    },
-                { label = "Green", value = "green", description = "A natural color" }
-            }
-        })
-    )
-    message:Reply("Choose a color:", nil, { row })
+    local menu = silicord.Instance.new("SelectMenu")
+    menu.CustomId    = "color_pick"
+    menu.Placeholder = "Pick a color"
+    menu:AddOption("Red",   "red",   "A warm color")
+    menu:AddOption("Blue",  "blue",  "A cool color")
+    menu:AddOption("Green", "green", "A natural color")
+
+    local row = silicord.Instance.new("ActionRow")
+    row:Add(menu)
+
+    message:Reply("Choose a color:", nil, { row:Build() })
 end)
 
 client:CreateComponent("color_pick", function(interaction)
     interaction:Update("You picked: **" .. interaction.values[1] .. "**")
 end)'>copy</button></div>
           <pre><code class="lua">client:<span class="fn">CreateCommand</span>(<span class="str">"color"</span>, <span class="kw">function</span>(message, args)
-    <span class="kw">local</span> row = silicord.<span class="fn">ActionRow</span>(
-        silicord.<span class="fn">SelectMenu</span>({
-            custom_id   = <span class="str">"color_pick"</span>,
-            placeholder = <span class="str">"Pick a color"</span>,
-            options = {
-                { label = <span class="str">"Red"</span>,   value = <span class="str">"red"</span>,   description = <span class="str">"A warm color"</span>    },
-                { label = <span class="str">"Blue"</span>,  value = <span class="str">"blue"</span>,  description = <span class="str">"A cool color"</span>    },
-                { label = <span class="str">"Green"</span>, value = <span class="str">"green"</span>, description = <span class="str">"A natural color"</span> }
-            }
-        })
-    )
-    message:<span class="fn">Reply</span>(<span class="str">"Choose a color:"</span>, <span class="kw">nil</span>, { row })
+    <span class="kw">local</span> menu = silicord.Instance.<span class="fn">new</span>(<span class="str">"SelectMenu"</span>)
+    menu.CustomId    = <span class="str">"color_pick"</span>
+    menu.Placeholder = <span class="str">"Pick a color"</span>
+    menu:<span class="fn">AddOption</span>(<span class="str">"Red"</span>,   <span class="str">"red"</span>,   <span class="str">"A warm color"</span>)
+    menu:<span class="fn">AddOption</span>(<span class="str">"Blue"</span>,  <span class="str">"blue"</span>,  <span class="str">"A cool color"</span>)
+    menu:<span class="fn">AddOption</span>(<span class="str">"Green"</span>, <span class="str">"green"</span>, <span class="str">"A natural color"</span>)
+
+    <span class="kw">local</span> row = silicord.Instance.<span class="fn">new</span>(<span class="str">"ActionRow"</span>)
+    row:<span class="fn">Add</span>(menu)
+
+    message:<span class="fn">Reply</span>(<span class="str">"Choose a color:"</span>, <span class="kw">nil</span>, { row:<span class="fn">Build</span>() })
 <span class="kw">end</span>)
 
 client:<span class="fn">CreateComponent</span>(<span class="str">"color_pick"</span>, <span class="kw">function</span>(interaction)
     interaction:<span class="fn">Update</span>(<span class="str">"You picked: **"</span> .. interaction.values[<span class="num">1</span>] .. <span class="str">"**"</span>)
 <span class="kw">end</span>)</code></pre>
         </div>
+
+        <h3 class="doc-sub" style="margin-top:1.5rem">SelectMenu properties</h3>
+        <div class="method-table">
+          <div class="method-row header"><div>Property / Method</div><div>Description</div></div>
+          <div class="method-row"><div><code>menu.CustomId</code></div><div>ID matched by <code>client:CreateComponent()</code></div></div>
+          <div class="method-row"><div><code>menu.Placeholder</code></div><div>Placeholder text (default: <code>"Select an option..."</code>)</div></div>
+          <div class="method-row"><div><code>menu.MinValues</code></div><div>Minimum selections required (default: 1)</div></div>
+          <div class="method-row"><div><code>menu.MaxValues</code></div><div>Maximum selections allowed (default: 1)</div></div>
+          <div class="method-row"><div><code>menu:AddOption(label, value, desc, emoji, default)</code></div><div>Add an option; returns the menu for chaining</div></div>
+          <div class="method-row"><div><code>menu:Build()</code></div><div>Returns the raw component table</div></div>
+        </div>
+
+        <!-- DEPRECATED legacy helpers -->
+        <h3 class="doc-sub" style="margin-top:2.5rem">Legacy table syntax <span class="badge badge-deprecated">deprecated</span></h3>
+        <div class="deprecated-box">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <div>
+            <strong>Deprecated since v1.0.0.</strong> The following helpers still work but emit a yellow runtime warning and will be removed in a future major version. Migrate to the OOP API above.
+            <ul style="margin:0.5rem 0 0 1rem; padding:0; list-style:disc;">
+              <li><code>silicord.Button({ ... })</code> → <code>silicord.Instance.new("Button")</code></li>
+              <li><code>silicord.SelectMenu({ ... })</code> → <code>silicord.Instance.new("SelectMenu")</code></li>
+              <li><code>silicord.ActionRow(...)</code> → <code>silicord.Instance.new("ActionRow")</code></li>
+            </ul>
+          </div>
+        </div>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">lua</span><button class="copy-code" data-code='-- ⚠ DEPRECATED
+local row = silicord.ActionRow(
+    silicord.Button({ label = "Yes", style = "success", custom_id = "vote_yes" }),
+    silicord.Button({ label = "No",  style = "danger",  custom_id = "vote_no"  })
+)'>copy</button></div>
+          <pre><code class="lua"><span class="cmt">-- ⚠ DEPRECATED</span>
+<span class="kw">local</span> row = silicord.<span class="fn">ActionRow</span>(
+    silicord.<span class="fn">Button</span>({ label = <span class="str">"Yes"</span>, style = <span class="str">"success"</span>, custom_id = <span class="str">"vote_yes"</span> }),
+    silicord.<span class="fn">Button</span>({ label = <span class="str">"No"</span>,  style = <span class="str">"danger"</span>,  custom_id = <span class="str">"vote_no"</span>  })
+)</code></pre>
+        </div>
       </section>
 
-      <!-- MIDDLEWARE -->
+      <!-- ═══════════════════════════════════════════════════════
+           DATASTORE
+      ════════════════════════════════════════════════════════ -->
+      <section class="doc-section" id="datastore">
+        <div class="doc-section-label">Advanced</div>
+        <h2 class="doc-section-title">DataStore</h2>
+        <p class="doc-p">JSON file-based persistence. Each store maps to a <code>&lt;name&gt;.datastore.json</code> file on disk. Stores are cached in memory after the first load — calling <code>silicord.DataStore("name")</code> twice returns the same instance.</p>
+
+        <div class="new-box">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <div><strong>v1.0.0 safety improvements:</strong>
+            <ul style="margin:0.5rem 0 0 1rem; padding:0; list-style:disc;">
+              <li>Empty or missing JSON files start as a fresh store instead of crashing.</li>
+              <li>Corrupt JSON is automatically backed up to <code>name.datastore.json.corrupted_&lt;timestamp&gt;</code> and the store resets.</li>
+              <li>All writes use an atomic temp-file swap — a crash mid-write can never corrupt your data.</li>
+              <li><code>IncrementAsync</code> resets non-numeric values to <code>0</code> with a warning instead of throwing an error.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">lua</span><button class="copy-code" data-code='local db = silicord.DataStore("PlayerData")
+
+-- Write a value
+db:SetAsync("score_user123", 500)
+
+-- Read a value (returns nil if not set)
+local score = db:GetAsync("score_user123")
+
+-- Increment a numeric value (safe in v1.0.0+)
+local new_score = db:IncrementAsync("score_user123", 10)
+
+-- Remove a value
+db:RemoveAsync("score_user123")
+
+-- List all keys in the store
+local keys = db:GetKeys()
+for _, k in ipairs(keys) do
+    print(k, db:GetAsync(k))
+end'>copy</button></div>
+          <pre><code class="lua"><span class="kw">local</span> db = silicord.<span class="fn">DataStore</span>(<span class="str">"PlayerData"</span>)
+
+<span class="cmt">-- Write a value</span>
+db:<span class="fn">SetAsync</span>(<span class="str">"score_user123"</span>, <span class="num">500</span>)
+
+<span class="cmt">-- Read a value (returns nil if not set)</span>
+<span class="kw">local</span> score = db:<span class="fn">GetAsync</span>(<span class="str">"score_user123"</span>)
+
+<span class="cmt">-- Increment a numeric value (safe in v1.0.0+)</span>
+<span class="kw">local</span> new_score = db:<span class="fn">IncrementAsync</span>(<span class="str">"score_user123"</span>, <span class="num">10</span>)
+
+<span class="cmt">-- Remove a value</span>
+db:<span class="fn">RemoveAsync</span>(<span class="str">"score_user123"</span>)
+
+<span class="cmt">-- List all keys</span>
+<span class="kw">local</span> keys = db:<span class="fn">GetKeys</span>()
+<span class="kw">for</span> _, k <span class="kw">in</span> <span class="fn">ipairs</span>(keys) <span class="kw">do</span>
+    <span class="fn">print</span>(k, db:<span class="fn">GetAsync</span>(k))
+<span class="kw">end</span></code></pre>
+        </div>
+
+        <div class="method-table" style="margin-top:1rem">
+          <div class="method-row header"><div>Method</div><div>Description</div></div>
+          <div class="method-row"><div><code>store:SetAsync(key, value)</code></div><div>Write any JSON-serializable value</div></div>
+          <div class="method-row"><div><code>store:GetAsync(key)</code></div><div>Read a value; returns <code>nil</code> if missing</div></div>
+          <div class="method-row"><div><code>store:RemoveAsync(key)</code></div><div>Delete a key</div></div>
+          <div class="method-row"><div><code>store:IncrementAsync(key, delta)</code></div><div>Add <code>delta</code> to a numeric key (default <code>+1</code>); safe against corrupt values in v1.0.0+</div></div>
+          <div class="method-row"><div><code>store:GetKeys()</code></div><div>Returns a table of all keys in the store</div></div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════════════
+           SIGNAL
+      ════════════════════════════════════════════════════════ -->
+      <section class="doc-section" id="signal">
+        <div class="doc-section-label">Advanced</div>
+        <h2 class="doc-section-title">Signal</h2>
+        <p class="doc-p">A Roblox-style event system. Create custom signals to decouple different parts of your bot. <code>client.OnMessage</code> and <code>client.OnError</code> are built-in signals exposed by the client.</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">lua</span><button class="copy-code" data-code='-- Create a custom signal
+local mySignal = silicord.Signal.new()
+
+-- Connect a listener (returns a connection with :Disconnect())
+local conn = mySignal:Connect(function(a, b)
+    print("Signal fired!", a, b)
+end)
+
+-- Fire the signal
+mySignal:Fire("hello", 42)
+
+-- Disconnect later
+conn.Disconnect()
+
+-- Yield the current coroutine until the signal fires
+silicord.task.spawn(function()
+    local a, b = mySignal:Wait()
+    print("Resumed with:", a, b)
+end)
+
+-- Built-in: listen to all non-command messages
+client.OnMessage:Connect(function(message)
+    print(message.author.username .. ": " .. message.content)
+end)
+
+-- Built-in: catch errors
+client.OnError:Connect(function(err_type, ctx, cmd, err_msg)
+    print("[" .. err_type .. "]", cmd, err_msg)
+end)'>copy</button></div>
+          <pre><code class="lua"><span class="cmt">-- Create a custom signal</span>
+<span class="kw">local</span> mySignal = silicord.Signal.<span class="fn">new</span>()
+
+<span class="cmt">-- Connect a listener (returns a connection)</span>
+<span class="kw">local</span> conn = mySignal:<span class="fn">Connect</span>(<span class="kw">function</span>(a, b)
+    <span class="fn">print</span>(<span class="str">"Signal fired!"</span>, a, b)
+<span class="kw">end</span>)
+
+<span class="cmt">-- Fire the signal</span>
+mySignal:<span class="fn">Fire</span>(<span class="str">"hello"</span>, <span class="num">42</span>)
+
+<span class="cmt">-- Disconnect later</span>
+conn.<span class="fn">Disconnect</span>()
+
+<span class="cmt">-- Yield until the signal fires</span>
+silicord.task.<span class="fn">spawn</span>(<span class="kw">function</span>()
+    <span class="kw">local</span> a, b = mySignal:<span class="fn">Wait</span>()
+    <span class="fn">print</span>(<span class="str">"Resumed with:"</span>, a, b)
+<span class="kw">end</span>)
+
+<span class="cmt">-- Built-in: listen to all non-command messages</span>
+client.OnMessage:<span class="fn">Connect</span>(<span class="kw">function</span>(message)
+    <span class="fn">print</span>(message.author.username .. <span class="str">": "</span> .. message.content)
+<span class="kw">end</span>)</code></pre>
+        </div>
+
+        <div class="method-table" style="margin-top:1rem">
+          <div class="method-row header"><div>Method</div><div>Description</div></div>
+          <div class="method-row"><div><code>Signal.new()</code></div><div>Create a new signal instance</div></div>
+          <div class="method-row"><div><code>signal:Connect(callback)</code></div><div>Add a listener; returns a connection object with <code>.Disconnect()</code></div></div>
+          <div class="method-row"><div><code>signal:Fire(...)</code></div><div>Fire the signal; all listeners run in spawned threads</div></div>
+          <div class="method-row"><div><code>signal:Wait()</code></div><div>Yield the current coroutine until the signal fires; returns the fired arguments</div></div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════════════
+           STANDARD LIBRARIES
+      ════════════════════════════════════════════════════════ -->
+      <section class="doc-section" id="stdlib">
+        <div class="doc-section-label">Advanced</div>
+        <h2 class="doc-section-title">Standard Libraries</h2>
+        <p class="doc-p">silicord ships small utility modules that mirror Roblox's standard library extensions. They don't replace Lua's built-ins — they add helpers that Lua is missing.</p>
+
+        <h3 class="doc-sub">silicord.math</h3>
+        <div class="method-table">
+          <div class="method-row header"><div>Function</div><div>Description</div></div>
+          <div class="method-row"><div><code>silicord.math.clamp(n, min, max)</code></div><div>Clamp <code>n</code> between <code>min</code> and <code>max</code></div></div>
+          <div class="method-row"><div><code>silicord.math.round(n)</code></div><div>Round to the nearest integer</div></div>
+          <div class="method-row"><div><code>silicord.math.lerp(a, b, t)</code></div><div>Linear interpolation; <code>t</code> in 0–1</div></div>
+          <div class="method-row"><div><code>silicord.math.sign(n)</code></div><div>Returns <code>1</code>, <code>-1</code>, or <code>0</code></div></div>
+        </div>
+
+        <h3 class="doc-sub" style="margin-top:2rem">silicord.table</h3>
+        <div class="method-table">
+          <div class="method-row header"><div>Function</div><div>Description</div></div>
+          <div class="method-row"><div><code>silicord.table.find(t, value)</code></div><div>Returns the index of <code>value</code>, or <code>nil</code></div></div>
+          <div class="method-row"><div><code>silicord.table.contains(t, value)</code></div><div>Returns <code>true</code> if <code>value</code> is in the table</div></div>
+          <div class="method-row"><div><code>silicord.table.keys(t)</code></div><div>Returns all keys as a sequential table</div></div>
+          <div class="method-row"><div><code>silicord.table.values(t)</code></div><div>Returns all values as a sequential table</div></div>
+          <div class="method-row"><div><code>silicord.table.copy(t)</code></div><div>Shallow copy of a table</div></div>
+        </div>
+
+        <h3 class="doc-sub" style="margin-top:2rem">silicord.string</h3>
+        <div class="method-table">
+          <div class="method-row header"><div>Function</div><div>Description</div></div>
+          <div class="method-row"><div><code>silicord.string.split(str, sep)</code></div><div>Split a string by a separator pattern (default: whitespace)</div></div>
+          <div class="method-row"><div><code>silicord.string.trim(str)</code></div><div>Remove leading and trailing whitespace</div></div>
+          <div class="method-row"><div><code>silicord.string.startsWith(str, prefix)</code></div><div>Returns <code>true</code> if <code>str</code> starts with <code>prefix</code></div></div>
+          <div class="method-row"><div><code>silicord.string.endsWith(str, suffix)</code></div><div>Returns <code>true</code> if <code>str</code> ends with <code>suffix</code></div></div>
+          <div class="method-row"><div><code>silicord.string.pad(str, length, char)</code></div><div>Right-pad <code>str</code> to <code>length</code> with <code>char</code> (default: space)</div></div>
+        </div>
+
+        <div class="code-block" style="margin-top:1.5rem">
+          <div class="code-header"><span class="code-lang">lua</span><button class="copy-code" data-code='local clamped = silicord.math.clamp(150, 0, 100)   -- 100
+local lerped  = silicord.math.lerp(0, 10, 0.5)     -- 5.0
+
+local parts = silicord.string.split("a,b,c", ",")  -- {"a","b","c"}
+local clean = silicord.string.trim("  hello  ")    -- "hello"
+
+local idx = silicord.table.find({"a","b","c"}, "b") -- 2
+local copy = silicord.table.copy(someTable)'>copy</button></div>
+          <pre><code class="lua"><span class="kw">local</span> clamped = silicord.math.<span class="fn">clamp</span>(<span class="num">150</span>, <span class="num">0</span>, <span class="num">100</span>)   <span class="cmt">-- 100</span>
+<span class="kw">local</span> lerped  = silicord.math.<span class="fn">lerp</span>(<span class="num">0</span>, <span class="num">10</span>, <span class="num">0.5</span>)     <span class="cmt">-- 5.0</span>
+
+<span class="kw">local</span> parts = silicord.string.<span class="fn">split</span>(<span class="str">"a,b,c"</span>, <span class="str">","</span>)  <span class="cmt">-- {"a","b","c"}</span>
+<span class="kw">local</span> clean = silicord.string.<span class="fn">trim</span>(<span class="str">"  hello  "</span>)    <span class="cmt">-- "hello"</span>
+
+<span class="kw">local</span> idx  = silicord.table.<span class="fn">find</span>({<span class="str">"a"</span>,<span class="str">"b"</span>,<span class="str">"c"</span>}, <span class="str">"b"</span>) <span class="cmt">-- 2</span>
+<span class="kw">local</span> copy = silicord.table.<span class="fn">copy</span>(someTable)</code></pre>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════════════
+           COLLECTION SERVICE
+      ════════════════════════════════════════════════════════ -->
+      <section class="doc-section" id="collection">
+        <div class="doc-section-label">Advanced</div>
+        <h2 class="doc-section-title">CollectionService</h2>
+        <p class="doc-p">A Roblox-style tag registry. Attach string tags to any Lua value (table, string, number, etc.) and query them later. Useful for flagging users, channels, or custom objects without storing extra state.</p>
+
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">lua</span><button class="copy-code" data-code='local cs = silicord.CollectionService
+
+-- Tag a user ID
+cs:AddTag(message.author.id, "admin")
+cs:AddTag(message.author.id, "vip")
+
+-- Check tags
+print(cs:HasTag(message.author.id, "admin"))  -- true
+
+-- Get all objects with a tag
+local admins = cs:GetTagged("admin")
+for _, id in ipairs(admins) do print(id) end
+
+-- Get all tags on an object
+local tags = cs:GetTags(message.author.id)    -- { "admin", "vip" }
+
+-- Remove a tag
+cs:RemoveTag(message.author.id, "vip")'>copy</button></div>
+          <pre><code class="lua"><span class="kw">local</span> cs = silicord.CollectionService
+
+<span class="cmt">-- Tag a user ID</span>
+cs:<span class="fn">AddTag</span>(message.author.id, <span class="str">"admin"</span>)
+cs:<span class="fn">AddTag</span>(message.author.id, <span class="str">"vip"</span>)
+
+<span class="cmt">-- Check tags</span>
+<span class="fn">print</span>(cs:<span class="fn">HasTag</span>(message.author.id, <span class="str">"admin"</span>))  <span class="cmt">-- true</span>
+
+<span class="cmt">-- Get all objects with a tag</span>
+<span class="kw">local</span> admins = cs:<span class="fn">GetTagged</span>(<span class="str">"admin"</span>)
+<span class="kw">for</span> _, id <span class="kw">in</span> <span class="fn">ipairs</span>(admins) <span class="kw">do</span> <span class="fn">print</span>(id) <span class="kw">end</span>
+
+<span class="cmt">-- Get all tags on an object</span>
+<span class="kw">local</span> tags = cs:<span class="fn">GetTags</span>(message.author.id)  <span class="cmt">-- { "admin", "vip" }</span>
+
+<span class="cmt">-- Remove a tag</span>
+cs:<span class="fn">RemoveTag</span>(message.author.id, <span class="str">"vip"</span>)</code></pre>
+        </div>
+
+        <div class="method-table" style="margin-top:1rem">
+          <div class="method-row header"><div>Method</div><div>Description</div></div>
+          <div class="method-row"><div><code>cs:AddTag(object, tag)</code></div><div>Attach a tag string to any value</div></div>
+          <div class="method-row"><div><code>cs:RemoveTag(object, tag)</code></div><div>Remove a specific tag</div></div>
+          <div class="method-row"><div><code>cs:HasTag(object, tag)</code></div><div>Returns <code>true</code> if the object has the tag</div></div>
+          <div class="method-row"><div><code>cs:GetTagged(tag)</code></div><div>Returns all objects with this tag</div></div>
+          <div class="method-row"><div><code>cs:GetTags(object)</code></div><div>Returns all tags on this object</div></div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════════════
+           MIDDLEWARE
+      ════════════════════════════════════════════════════════ -->
       <section class="doc-section" id="middleware">
         <div class="doc-section-label">Advanced</div>
         <h2 class="doc-section-title">Middleware</h2>
-        <p class="doc-p">Middleware hooks run before every command. Return <code>false</code> to block the command entirely.</p>
+        <p class="doc-p">Middleware hooks run before every prefix command and slash command. Return <code>false</code> to block the command. Multiple middleware functions can be registered and run in order.</p>
         <div class="code-block">
           <div class="code-header"><span class="code-lang">lua</span><button class="copy-code" data-code='-- Cooldown hook (3 seconds per command per user)
 local cooldowns = {}
@@ -473,10 +1012,13 @@ client:AddMiddleware(function(ctx, cmd, args)
     cooldowns[key] = os.time()
 end)
 
--- Admin-only hook
+-- Admin-only guard
+local ADMIN_ID = "123456789012345678"
 client:AddMiddleware(function(ctx, cmd, args)
-    if cmd == "ban" then
-        -- check permissions, return false to block
+    local protected = { ban = true, kick = true, purge = true }
+    if protected[cmd] and ctx.author.id ~= ADMIN_ID then
+        ctx:Reply("You do not have permission to use this command.")
+        return false
     end
 end)'>copy</button></div>
           <pre><code class="lua"><span class="cmt">-- Cooldown hook (3 seconds per command per user)</span>
@@ -490,67 +1032,151 @@ client:<span class="fn">AddMiddleware</span>(<span class="kw">function</span>(ct
     cooldowns[key] = os.<span class="fn">time</span>()
 <span class="kw">end</span>)
 
-<span class="cmt">-- Admin-only hook</span>
+<span class="cmt">-- Admin-only guard</span>
+<span class="kw">local</span> ADMIN_ID = <span class="str">"123456789012345678"</span>
 client:<span class="fn">AddMiddleware</span>(<span class="kw">function</span>(ctx, cmd, args)
-    <span class="kw">if</span> cmd == <span class="str">"ban"</span> <span class="kw">then</span>
-        <span class="cmt">-- check permissions, return false to block</span>
+    <span class="kw">local</span> protected = { ban = <span class="kw">true</span>, kick = <span class="kw">true</span>, purge = <span class="kw">true</span> }
+    <span class="kw">if</span> protected[cmd] <span class="kw">and</span> ctx.author.id ~= ADMIN_ID <span class="kw">then</span>
+        ctx:<span class="fn">Reply</span>(<span class="str">"You do not have permission to use this command."</span>)
+        <span class="kw">return false</span>
     <span class="kw">end</span>
 <span class="kw">end</span>)</code></pre>
         </div>
       </section>
 
-      <!-- CACHING -->
+      <!-- ═══════════════════════════════════════════════════════
+           CACHING
+      ════════════════════════════════════════════════════════ -->
       <section class="doc-section" id="caching">
         <div class="doc-section-label">Advanced</div>
         <h2 class="doc-section-title">Caching</h2>
-        <p class="doc-p">silicord automatically caches guild and user data from Discord gateway events. <code>message:GetGuild()</code> checks the cache before making an HTTP request.</p>
+        <p class="doc-p">silicord automatically caches guild and user data from Discord gateway events. <code>message:GetGuild()</code> checks the cache before making an HTTP request, avoiding unnecessary API calls.</p>
         <div class="code-block">
-          <div class="code-header"><span class="code-lang">lua</span><button class="copy-code" data-code='client.cache.guilds   -- table of guild data keyed by guild ID
-client.cache.users    -- table of user data keyed by user ID
-client.cache.bot_user -- the bot\'s own user object'>copy</button></div>
-          <pre><code class="lua">client.cache.guilds   <span class="cmt">-- table of guild data keyed by guild ID</span>
-client.cache.users    <span class="cmt">-- table of user data keyed by user ID</span>
-client.cache.bot_user <span class="cmt">-- the bot's own user object</span></code></pre>
+          <div class="code-header"><span class="code-lang">lua</span><button class="copy-code" data-code='client.cache.guilds   -- table of raw guild data keyed by guild ID
+client.cache.users    -- table of raw user data keyed by user ID
+client.cache.bot_user -- the bot\'s own user object (set after READY)'>copy</button></div>
+          <pre><code class="lua">client.cache.guilds   <span class="cmt">-- table of raw guild data keyed by guild ID</span>
+client.cache.users    <span class="cmt">-- table of raw user data keyed by user ID</span>
+client.cache.bot_user <span class="cmt">-- the bot's own user object (set after READY)</span></code></pre>
+        </div>
+
+        <div class="tip-box">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          The cache is populated by <code>GUILD_CREATE</code> and <code>MESSAGE_CREATE</code> gateway events. It holds raw Discord API tables, not silicord objects. Wrap them in <code>Guild.new()</code> if you need full method access.
         </div>
       </section>
 
-      <!-- SHARDING -->
+      <!-- ═══════════════════════════════════════════════════════
+           SHARDING
+      ════════════════════════════════════════════════════════ -->
       <section class="doc-section" id="sharding">
         <div class="doc-section-label">Advanced</div>
         <h2 class="doc-section-title">Sharding</h2>
-        <p class="doc-p">Sharding is fully automatic. silicord fetches the recommended shard count from Discord on startup and spawns the correct number of gateway connections with the required delay between each. You don't need to configure anything.</p>
+        <p class="doc-p">Sharding is fully automatic. silicord fetches the recommended shard count from Discord on startup and spawns the correct number of gateway connections with the required 5-second delay between each. You don't need to configure anything.</p>
         <div class="tip-box">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          Sharding is only needed for large bots (2500+ servers). For most bots silicord's automatic handling just works transparently in the background.
+          Sharding is only needed for large bots (2500+ servers). For most bots silicord's automatic handling works transparently in the background.
         </div>
       </section>
 
-      <!-- TASK -->
+      <!-- ═══════════════════════════════════════════════════════
+           TASK SCHEDULER
+      ════════════════════════════════════════════════════════ -->
       <section class="doc-section" id="task">
         <div class="doc-section-label">Advanced</div>
         <h2 class="doc-section-title">task scheduler</h2>
-        <p class="doc-p">Roblox-style async helpers available anywhere in your bot code.</p>
-        <div class="code-block">
-          <div class="code-header"><span class="code-lang">lua</span><button class="copy-code" data-code='silicord.task.wait(2)
+        <p class="doc-p">Roblox-style async helpers available anywhere in your bot code. All functions run inside copas coroutines — they never block the gateway loop.</p>
 
+        <div class="method-table">
+          <div class="method-row header"><div>Function</div><div>Description</div></div>
+          <div class="method-row"><div><code>silicord.task.wait(n)</code></div><div>Yield for <code>n</code> seconds; returns <code>n</code></div></div>
+          <div class="method-row"><div><code>silicord.task.spawn(f, ...)</code></div><div>Run <code>f</code> in a new coroutine immediately</div></div>
+          <div class="method-row">
+            <div><code>silicord.task.defer(f, ...)</code> <span class="badge badge-new">v1.0.0+</span></div>
+            <div>Run <code>f</code> on the next scheduler cycle — useful for avoiding stack overflows in recursive patterns</div>
+          </div>
+          <div class="method-row">
+            <div><code>silicord.task.delay(n, f, ...)</code> <span class="badge badge-new">v1.0.0+</span></div>
+            <div>Call <code>f(...)</code> after <code>n</code> seconds without blocking the caller — the clean way to write timers</div>
+          </div>
+        </div>
+
+        <div class="code-block" style="margin-top:1.5rem">
+          <div class="code-header"><span class="code-lang">lua</span><button class="copy-code" data-code='-- Pause inside any coroutine
+silicord.task.wait(2)
+
+-- Fire and forget a background thread
 silicord.task.spawn(function()
     silicord.task.wait(5)
     print("5 seconds later")
-end)'>copy</button></div>
-          <pre><code class="lua">silicord.task.<span class="fn">wait</span>(<span class="num">2</span>)
+end)
 
+-- v1.0.0+: defer — runs after the current frame completes
+silicord.task.defer(function()
+    print("deferred to next cycle")
+end)
+
+-- v1.0.0+: delay — clean one-shot timer
+silicord.task.delay(10, function()
+    print("10 seconds have passed")
+end)
+
+-- Practical: send a message then delete it after 5 seconds
+client:CreateCommand("temp", function(message, args)
+    message:Reply("This will disappear in 5 seconds!")
+    silicord.task.delay(5, function()
+        message:Delete()
+    end)
+end)'>copy</button></div>
+          <pre><code class="lua"><span class="cmt">-- Pause inside any coroutine</span>
+silicord.task.<span class="fn">wait</span>(<span class="num">2</span>)
+
+<span class="cmt">-- Fire and forget a background thread</span>
 silicord.task.<span class="fn">spawn</span>(<span class="kw">function</span>()
     silicord.task.<span class="fn">wait</span>(<span class="num">5</span>)
     <span class="fn">print</span>(<span class="str">"5 seconds later"</span>)
+<span class="kw">end</span>)
+
+<span class="cmt">-- v1.0.0+: defer — runs after the current frame completes</span>
+silicord.task.<span class="fn">defer</span>(<span class="kw">function</span>()
+    <span class="fn">print</span>(<span class="str">"deferred to next cycle"</span>)
+<span class="kw">end</span>)
+
+<span class="cmt">-- v1.0.0+: delay — clean one-shot timer</span>
+silicord.task.<span class="fn">delay</span>(<span class="num">10</span>, <span class="kw">function</span>()
+    <span class="fn">print</span>(<span class="str">"10 seconds have passed"</span>)
+<span class="kw">end</span>)
+
+<span class="cmt">-- Practical: send a temp message that auto-deletes</span>
+client:<span class="fn">CreateCommand</span>(<span class="str">"temp"</span>, <span class="kw">function</span>(message, args)
+    message:<span class="fn">Reply</span>(<span class="str">"This will disappear in 5 seconds!"</span>)
+    silicord.task.<span class="fn">delay</span>(<span class="num">5</span>, <span class="kw">function</span>()
+        message:<span class="fn">Delete</span>()
+    <span class="kw">end</span>)
 <span class="kw">end</span>)</code></pre>
         </div>
       </section>
 
-      <!-- CHANGELOG -->
+      <!-- ═══════════════════════════════════════════════════════
+           CHANGELOG
+      ════════════════════════════════════════════════════════ -->
       <section class="doc-section" id="changelog">
         <div class="doc-section-label">Advanced</div>
         <h2 class="doc-section-title">Changelog</h2>
-          <div class="changelog">
+        <div class="changelog">
+
+          <div class="changelog-item">
+            <div class="changelog-ver">v1.0.0</div>
+            <div class="changelog-body">
+              <strong>DataStore safety:</strong> <code>IncrementAsync</code> now handles corrupt/empty/locked JSON without crashing; writes use atomic temp-file swapping; corrupt files are auto-backed-up.
+              <br><strong>Color3 UX:</strong> <code>Color3</code> objects can be passed directly to all color fields — no more <code>:ToInt()</code>.
+              <br><strong>task.defer():</strong> Defers a function to the next scheduler cycle to avoid stack overflows.
+              <br><strong>task.delay():</strong> Clean one-shot timer — call a function after <code>n</code> seconds without a manual loop.
+              <br><strong>Instance.new("SelectMenu") and Instance.new("ActionRow"):</strong> OOP classes added to match Embed and Button.
+              <br><strong>Deprecation warnings:</strong> <code>silicord.Embed()</code>, <code>silicord.Button()</code>, <code>silicord.SelectMenu()</code>, and <code>silicord.ActionRow()</code> now print runtime warnings. Migrate to <code>silicord.Instance.new()</code>.
+            </div>
+          </div>
+
           <div class="changelog-item">
             <div class="changelog-ver">v0.4.3</div>
             <div class="changelog-body">Added a favicon</div>

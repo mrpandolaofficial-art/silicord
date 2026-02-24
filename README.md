@@ -1,4 +1,4 @@
-# [silicord](https://silicord.github.io) v0.4.3
+# [silicord](https://silicord.github.io) v1.0.0
 
 A Discord bot framework for Lua with **Luau-inspired syntax**. Built for Roblox developers who want to write Discord bots using familiar patterns like `task.wait()`, Signals, and method chaining.
 
@@ -125,17 +125,18 @@ end)
 | `message:GetGuild()` | Returns a Guild object (uses cache automatically) |
 | `message:GetMember()` | Returns a Member object for the message author |
 | `message:SendPrivateMessage(text)` | DM the message author |
+| `message:SendPrivateMessage(text, embed)` | DM the message author with an embed |
 
 ```lua
 client:CreateCommand("info", function(message, args)
     message:React("👀")
-    local embed = silicord.Embed({
-        title       = "Hello!",
-        description = "This is an embed.",
-        color       = "#5865F2",
-        footer      = "silicord"
-    })
-    message:Reply(embed)
+    -- v1.0.0+: use Instance.new("Embed") — see Embeds section
+    local embed = silicord.Instance.new("Embed")
+    embed.Title       = "Hello!"
+    embed.Description = "This is an embed."
+    embed.Color       = "#5865F2"
+    embed.Footer      = "silicord"
+    message:Reply(embed:Build())
 end)
 
 -- Send without pinging
@@ -174,7 +175,8 @@ local member = guild:GetMember(user_id)
 | `member:RemoveRole(role_id)` | Remove a role from the member |
 | `member:SetNickname(nick)` | Set the member's nickname |
 | `member:ResetNickname()` | Reset the member's nickname to their username |
-| `member:SendDM(text, embed)` | Send the member a DM |
+| `member:SendDM(text)` | Send the member a DM |
+| `member:SendDM(text, embed)` | Send the member a DM with an embed |
 
 ```lua
 client:CreateCommand("timeout", function(message, args)
@@ -209,62 +211,134 @@ member.user      -- raw Discord user object
 interaction:Reply("Hello!")
 interaction:Reply(text, embed)
 interaction:Reply(text, embed, components)
-interaction:Update("Updated content")     -- update the original message (for buttons)
+interaction:Update("Updated content")        -- update the original message (for buttons)
 interaction:Update(text, embed, components)
 interaction:GetGuild()
-interaction:GetMember()                   -- returns a Member object
+interaction:GetMember()                      -- returns a Member object
 interaction:SendPrivateMessage(text)
-interaction.args    -- slash command arguments keyed by name
-interaction.values  -- selected values from a select menu
-interaction.author  -- the user who triggered the interaction
+interaction:SendPrivateMessage(text, embed)
+
+interaction.args       -- slash command arguments keyed by name
+interaction.values     -- selected values from a select menu
+interaction.author     -- the user who triggered the interaction
+interaction.custom_id  -- the custom_id of the triggering component
+interaction.guild_id   -- the guild ID
+interaction.channel_id -- the channel ID
 ```
 
 ---
 
 ## Embeds
 
+### ✅ OOP API — recommended (v1.0.0+)
+
+Use `silicord.Instance.new("Embed")` for a clean builder. Pass a `Color3` object directly to `.Color` — no `:ToInt()` required.
+
 ```lua
+local embed = silicord.Instance.new("Embed")
+embed.Title       = "My Embed"
+embed.Description = "This is the description."
+embed.Color       = silicord.Color3.fromRGB(88, 101, 242)  -- Color3 object, no :ToInt() needed
+embed.Url         = "https://example.com"
+embed.Timestamp   = os.date("!%Y-%m-%dT%H:%M:%SZ")
+embed.Author      = "Author Name"
+embed.AuthorIcon  = "https://example.com/icon.png"
+embed.AuthorUrl   = "https://example.com"
+embed.Footer      = "Footer text"
+embed.FooterIcon  = "https://example.com/icon.png"
+embed.Image       = "https://example.com/image.png"
+embed.Thumbnail   = "https://example.com/thumb.png"
+embed:AddField("Field 1", "Value 1", true)
+embed:AddField("Field 2", "Value 2", true)
+embed:AddField("Field 3", "Value 3", false)
+
+message:Reply("Here's some info:", embed:Build())
+```
+
+| Property / Method | Description |
+|---|---|
+| `embed.Title` | Title string |
+| `embed.Description` | Body text |
+| `embed.Color` | Hex string, integer, or `Color3` object |
+| `embed.Url` | URL for the title link |
+| `embed.Timestamp` | ISO 8601 timestamp string |
+| `embed.Author / .AuthorIcon / .AuthorUrl` | Author section |
+| `embed.Footer / .FooterIcon` | Footer section |
+| `embed.Image / .Thumbnail` | Image URLs |
+| `embed:AddField(name, value, inline)` | Add a field; returns the embed for chaining |
+| `embed:Build()` | Returns the final table to pass to `:Reply()` etc. |
+
+### ⚠️ Table syntax — deprecated (pre-v0.4.3)
+
+> **Deprecated since v1.0.0.** `silicord.Embed({ ... })` still works but prints a runtime warning. Migrate to `silicord.Instance.new("Embed")`. This helper will be removed in a future major version.
+
+```lua
+-- ⚠ DEPRECATED — use silicord.Instance.new("Embed") instead
 local embed = silicord.Embed({
     title       = "My Embed",
     description = "This is the description.",
-    color       = "#5865F2",          -- hex string or integer
-    url         = "https://example.com",
-    timestamp   = os.date("!%Y-%m-%dT%H:%M:%SZ"),
-
-    author      = "Author Name",
-    author_icon = "https://example.com/icon.png",
-    author_url  = "https://example.com",
-
-    footer      = "Footer text",
-    footer_icon = "https://example.com/icon.png",
-
-    image       = "https://example.com/image.png",
-    thumbnail   = "https://example.com/thumb.png",
-
+    color       = "#5865F2",
     fields = {
-        { name = "Field 1", value = "Value 1", inline = true  },
-        { name = "Field 2", value = "Value 2", inline = true  },
-        { name = "Field 3", value = "Value 3", inline = false }
+        { name = "Field 1", value = "Value 1", inline = true },
     }
 })
-
 message:Reply(embed)
-message:Reply("Here's some info:", embed)
 ```
+
+---
+
+## Color3 (v1.0.0+)
+
+A Roblox-style color class. In v1.0.0+, `Color3` objects can be passed directly to any color field — no `:ToInt()` needed.
+
+```lua
+-- Create from RGB values (0–255)
+local c = silicord.Color3.fromRGB(88, 101, 242)
+
+-- Create from a hex string
+local c = silicord.Color3.fromHex("#5865F2")
+
+-- Use directly in an embed — no :ToInt() required
+local embed = silicord.Instance.new("Embed")
+embed.Color = silicord.Color3.fromHex("#57F287")
+
+-- Use in guild:CreateRole
+guild:CreateRole("Moderator", silicord.Color3.fromRGB(255, 165, 0))
+
+-- Still works: get the raw integer if you need it
+local int = c:ToInt()   -- 5793522
+```
+
+| Method / Property | Description |
+|---|---|
+| `Color3.fromRGB(r, g, b)` | Construct from 0–255 RGB values |
+| `Color3.fromHex(hex)` | Construct from a hex string (`"#RRGGBB"` or `"RRGGBB"`) |
+| `color.r / .g / .b` | Individual channel values (0–255) |
+| `color:ToInt()` | Returns the packed 24-bit integer (rarely needed in v1.0.0+) |
 
 ---
 
 ## Components (Buttons & Select Menus)
 
+### ✅ OOP API — recommended (v1.0.0+)
+
 ```lua
--- Buttons
 client:CreateCommand("vote", function(message, args)
-    local row = silicord.ActionRow(
-        silicord.Button({ label = "Yes",  style = "success",   custom_id = "vote_yes"  }),
-        silicord.Button({ label = "No",   style = "danger",    custom_id = "vote_no"   }),
-        silicord.Button({ label = "Skip", style = "secondary", custom_id = "vote_skip" })
-    )
-    message:Reply("Cast your vote!", nil, { row })
+    local yes = silicord.Instance.new("Button")
+    yes.Label    = "Yes"
+    yes.Style    = "success"
+    yes.CustomId = "vote_yes"
+
+    local no = silicord.Instance.new("Button")
+    no.Label    = "No"
+    no.Style    = "danger"
+    no.CustomId = "vote_no"
+
+    local row = silicord.Instance.new("ActionRow")
+    row:Add(yes)
+    row:Add(no)
+
+    message:Reply("Cast your vote!", nil, { row:Build() })
 end)
 
 client:CreateComponent("vote_yes", function(interaction)
@@ -272,29 +346,81 @@ client:CreateComponent("vote_yes", function(interaction)
 end)
 ```
 
-**Button styles:** `primary`, `secondary`, `success`, `danger`, `link`
+**Button properties:**
+
+| Property | Description |
+|---|---|
+| `button.Label` | Button text (default: `"Button"`) |
+| `button.Style` | `"primary"`, `"secondary"`, `"success"`, `"danger"`, `"link"` |
+| `button.CustomId` | ID matched by `client:CreateComponent()` |
+| `button.Url` | URL for `"link"`-style buttons |
+| `button.Emoji` | Emoji name string (e.g. `"👍"`) |
+| `button.Disabled` | `true` to disable (default: `false`) |
+| `button:Build()` | Returns the raw component table |
+
+**SelectMenu (v1.0.0+):**
 
 ```lua
--- Select menu
 client:CreateCommand("color", function(message, args)
-    local row = silicord.ActionRow(
-        silicord.SelectMenu({
-            custom_id   = "color_pick",
-            placeholder = "Pick a color",
-            options = {
-                { label = "Red",   value = "red",   description = "A warm color"    },
-                { label = "Blue",  value = "blue",  description = "A cool color"    },
-                { label = "Green", value = "green", description = "A natural color" }
-            }
-        })
-    )
-    message:Reply("Choose a color:", nil, { row })
+    local menu = silicord.Instance.new("SelectMenu")
+    menu.CustomId    = "color_pick"
+    menu.Placeholder = "Pick a color"
+    menu:AddOption("Red",   "red",   "A warm color")
+    menu:AddOption("Blue",  "blue",  "A cool color")
+    menu:AddOption("Green", "green", "A natural color")
+
+    local row = silicord.Instance.new("ActionRow")
+    row:Add(menu)
+
+    message:Reply("Choose a color:", nil, { row:Build() })
 end)
 
 client:CreateComponent("color_pick", function(interaction)
     interaction:Update("You picked: **" .. interaction.values[1] .. "**")
 end)
 ```
+
+| Property / Method | Description |
+|---|---|
+| `menu.CustomId` | ID matched by `client:CreateComponent()` |
+| `menu.Placeholder` | Placeholder text (default: `"Select an option..."`) |
+| `menu.MinValues` | Minimum selections required (default: 1) |
+| `menu.MaxValues` | Maximum selections allowed (default: 1) |
+| `menu:AddOption(label, value, desc, emoji, default)` | Add an option; returns the menu for chaining |
+| `menu:Build()` | Returns the raw component table |
+
+**ActionRow:**
+
+```lua
+local row = silicord.Instance.new("ActionRow")
+row:Add(button)   -- accepts Instance objects or raw built tables
+row:Add(menu)
+local built = row:Build()
+```
+
+### ⚠️ Table syntax — deprecated (pre-v0.4.3)
+
+> **Deprecated since v1.0.0.** These helpers still work but emit a yellow runtime warning. Migrate to the OOP API above.
+
+```lua
+-- ⚠ DEPRECATED
+local row = silicord.ActionRow(
+    silicord.Button({ label = "Yes", style = "success", custom_id = "vote_yes" }),
+    silicord.Button({ label = "No",  style = "danger",  custom_id = "vote_no"  })
+)
+
+-- ⚠ DEPRECATED
+silicord.SelectMenu({ custom_id = "pick", options = { ... } })
+```
+
+Deprecated helpers and their replacements:
+
+| Deprecated | Replacement |
+|---|---|
+| `silicord.Embed({ ... })` | `silicord.Instance.new("Embed")` |
+| `silicord.Button({ ... })` | `silicord.Instance.new("Button")` |
+| `silicord.SelectMenu({ ... })` | `silicord.Instance.new("SelectMenu")` |
+| `silicord.ActionRow(...)` | `silicord.Instance.new("ActionRow")` |
 
 ---
 
@@ -337,8 +463,6 @@ end)
 | `ComponentError` | Component callback threw a runtime error | Interaction | custom_id | Lua error string |
 | `UnknownInteraction` | A slash command was triggered with no registered handler | Interaction | command name | nil |
 
-The `ctx` argument is always either a Message or Interaction object, so you can always call `:Reply()` on it to send feedback directly to the user.
-
 ---
 
 ## Guild Object
@@ -352,15 +476,15 @@ local guild = message:GetGuild()
 
 | Method | Description |
 |--------|-------------|
-| `guild:CreateChannel(name, kind, options)` | Create a channel. See channel types below |
+| `guild:CreateChannel(name, kind, options)` | Create a channel — see channel types below |
 | `guild:EditChannel(channel_id, options)` | Edit an existing channel |
 | `guild:DeleteChannel(channel_id)` | Delete a channel |
-| `guild:CreateRole(name, color, permissions)` | Create a role |
-| `guild:EditRole(role_id, options)` | Edit an existing role |
+| `guild:CreateRole(name, color, permissions)` | Create a role — `color` accepts hex string, integer, or Color3 |
+| `guild:EditRole(role_id, options)` | Edit an existing role — `options.color` accepts hex, integer, or Color3 |
 | `guild:DeleteRole(role_id)` | Delete a role |
 | `guild:GetMembers(limit)` | Returns a list of Member objects |
 | `guild:GetMember(user_id)` | Returns a single Member object |
-| `guild:GetRandomMember()` | Returns a random Member object |
+| `guild:GetRandomMember()` | Returns a random Member object (from first 100) |
 | `guild:GetChannels()` | Returns all channels |
 | `guild:GetRoles()` | Returns all roles |
 | `guild:KickMember(user_id, reason)` | Kick a member by ID |
@@ -404,12 +528,12 @@ guild:CreateChannel("Music", "voice", {
 ```lua
 -- External event (at a location)
 guild:CreateEvent({
-    name       = "Game Night",
+    name        = "Game Night",
     description = "Monthly game night!",
-    type       = "external",
-    location   = "Discord Stage",
-    start_time = "2025-09-01T20:00:00Z",
-    end_time   = "2025-09-01T23:00:00Z"
+    type        = "external",
+    location    = "Discord Stage",
+    start_time  = "2025-09-01T20:00:00Z",
+    end_time    = "2025-09-01T23:00:00Z"
 })
 
 -- Stage or voice event
@@ -429,9 +553,172 @@ local events = guild:GetEvents()
 
 ---
 
+## DataStore (v1.0.0+)
+
+JSON file-based key-value persistence. Each store maps to a `<name>.datastore.json` file. Calling `silicord.DataStore("name")` twice returns the same cached instance.
+
+**v1.0.0 safety improvements:**
+- Empty or missing JSON files start as a fresh store instead of crashing.
+- Corrupt JSON is automatically backed up to `name.datastore.json.corrupted_<timestamp>` and the store resets.
+- All writes use an atomic temp-file swap — a crash mid-write can never corrupt your data.
+- `IncrementAsync` resets non-numeric values to `0` with a warning instead of throwing an error.
+
+```lua
+local db = silicord.DataStore("PlayerData")
+
+-- Write a value
+db:SetAsync("score_user123", 500)
+
+-- Read a value (returns nil if not set)
+local score = db:GetAsync("score_user123")
+
+-- Safely increment a numeric value
+local new_score = db:IncrementAsync("score_user123", 10)
+
+-- Remove a value
+db:RemoveAsync("score_user123")
+
+-- List all keys
+local keys = db:GetKeys()
+for _, k in ipairs(keys) do
+    print(k, db:GetAsync(k))
+end
+```
+
+| Method | Description |
+|---|---|
+| `store:SetAsync(key, value)` | Write any JSON-serializable value |
+| `store:GetAsync(key)` | Read a value; returns `nil` if missing |
+| `store:RemoveAsync(key)` | Delete a key |
+| `store:IncrementAsync(key, delta)` | Add `delta` to a numeric key (default `+1`); safe against corrupt values |
+| `store:GetKeys()` | Returns a table of all keys in the store |
+
+---
+
+## Signal
+
+A Roblox-style event system for decoupling bot logic. `client.OnMessage` and `client.OnError` are built-in signals.
+
+```lua
+-- Create a custom signal
+local mySignal = silicord.Signal.new()
+
+-- Connect a listener (returns a connection with .Disconnect())
+local conn = mySignal:Connect(function(a, b)
+    print("Signal fired!", a, b)
+end)
+
+-- Fire the signal
+mySignal:Fire("hello", 42)
+
+-- Disconnect later
+conn.Disconnect()
+
+-- Yield the current coroutine until the signal fires
+silicord.task.spawn(function()
+    local a, b = mySignal:Wait()
+    print("Resumed with:", a, b)
+end)
+
+-- Built-in: listen to all non-command messages
+client.OnMessage:Connect(function(message)
+    print(message.author.username .. ": " .. message.content)
+end)
+```
+
+| Method | Description |
+|---|---|
+| `Signal.new()` | Create a new signal instance |
+| `signal:Connect(callback)` | Add a listener; returns a connection object with `.Disconnect()` |
+| `signal:Fire(...)` | Fire the signal; all listeners run in spawned threads |
+| `signal:Wait()` | Yield the current coroutine until the signal fires; returns the fired arguments |
+
+---
+
+## Standard Libraries
+
+silicord ships small utility modules that mirror Roblox's standard library extensions.
+
+### silicord.math
+
+| Function | Description |
+|---|---|
+| `silicord.math.clamp(n, min, max)` | Clamp `n` between `min` and `max` |
+| `silicord.math.round(n)` | Round to the nearest integer |
+| `silicord.math.lerp(a, b, t)` | Linear interpolation; `t` in 0–1 |
+| `silicord.math.sign(n)` | Returns `1`, `-1`, or `0` |
+
+### silicord.table
+
+| Function | Description |
+|---|---|
+| `silicord.table.find(t, value)` | Returns the index of `value`, or `nil` |
+| `silicord.table.contains(t, value)` | Returns `true` if `value` is in the table |
+| `silicord.table.keys(t)` | Returns all keys as a sequential table |
+| `silicord.table.values(t)` | Returns all values as a sequential table |
+| `silicord.table.copy(t)` | Shallow copy of a table |
+
+### silicord.string
+
+| Function | Description |
+|---|---|
+| `silicord.string.split(str, sep)` | Split a string by a separator pattern (default: whitespace) |
+| `silicord.string.trim(str)` | Remove leading and trailing whitespace |
+| `silicord.string.startsWith(str, prefix)` | Returns `true` if `str` starts with `prefix` |
+| `silicord.string.endsWith(str, suffix)` | Returns `true` if `str` ends with `suffix` |
+| `silicord.string.pad(str, length, char)` | Right-pad `str` to `length` with `char` (default: space) |
+
+```lua
+local clamped = silicord.math.clamp(150, 0, 100)    -- 100
+local lerped  = silicord.math.lerp(0, 10, 0.5)      -- 5.0
+
+local parts = silicord.string.split("a,b,c", ",")   -- {"a","b","c"}
+local clean = silicord.string.trim("  hello  ")     -- "hello"
+
+local idx  = silicord.table.find({"a","b","c"}, "b") -- 2
+local copy = silicord.table.copy(someTable)
+```
+
+---
+
+## CollectionService
+
+A Roblox-style tag registry. Attach string tags to any Lua value and query them later — useful for flagging users, channels, or custom objects.
+
+```lua
+local cs = silicord.CollectionService
+
+-- Tag a user ID
+cs:AddTag(message.author.id, "admin")
+cs:AddTag(message.author.id, "vip")
+
+-- Check tags
+print(cs:HasTag(message.author.id, "admin"))  -- true
+
+-- Get all objects with a tag
+local admins = cs:GetTagged("admin")
+for _, id in ipairs(admins) do print(id) end
+
+-- Get all tags on an object
+local tags = cs:GetTags(message.author.id)    -- { "admin", "vip" }
+
+-- Remove a tag
+cs:RemoveTag(message.author.id, "vip")
+```
+
+| Method | Description |
+|---|---|
+| `cs:AddTag(object, tag)` | Attach a tag string to any value |
+| `cs:RemoveTag(object, tag)` | Remove a specific tag |
+| `cs:HasTag(object, tag)` | Returns `true` if the object has the tag |
+| `cs:GetTagged(tag)` | Returns all objects with this tag |
+| `cs:GetTags(object)` | Returns all tags on this object |
+
+---
+
 ## Middleware
 
-Middleware hooks run before every command. Return `false` to block the command entirely.
+Middleware hooks run before every prefix command and slash command. Return `false` to block the command. Multiple middleware functions are run in registration order.
 
 ```lua
 -- Cooldown hook (3 seconds per command per user)
@@ -445,10 +732,13 @@ client:AddMiddleware(function(ctx, cmd, args)
     cooldowns[key] = os.time()
 end)
 
--- Admin-only hook
+-- Admin-only guard
+local ADMIN_ID = "123456789012345678"
 client:AddMiddleware(function(ctx, cmd, args)
-    if cmd == "ban" then
-        -- check permissions, return false to block
+    local protected = { ban = true, kick = true, purge = true }
+    if protected[cmd] and ctx.author.id ~= ADMIN_ID then
+        ctx:Reply("You do not have permission to use this command.")
+        return false
     end
 end)
 ```
@@ -460,27 +750,56 @@ end)
 silicord automatically caches guild and user data from Discord gateway events. `message:GetGuild()` checks the cache before making an HTTP request.
 
 ```lua
-client.cache.guilds   -- table of guild data keyed by guild ID
-client.cache.users    -- table of user data keyed by user ID
-client.cache.bot_user -- the bot's own user object
+client.cache.guilds   -- table of raw guild data keyed by guild ID
+client.cache.users    -- table of raw user data keyed by user ID
+client.cache.bot_user -- the bot's own user object (set after READY)
 ```
 
 ---
 
 ## Sharding
 
-Sharding is fully automatic. silicord fetches the recommended shard count from Discord on startup and spawns the correct number of gateway connections with the required delay between each. You don't need to configure anything.
+Sharding is fully automatic. silicord fetches the recommended shard count from Discord on startup and spawns the correct number of gateway connections with the required 5-second delay between each. You don't need to configure anything.
+
+> Sharding is only needed for large bots (2500+ servers). For most bots, silicord's automatic handling works transparently in the background.
 
 ---
 
 ## task (Roblox-style Scheduler)
 
+| Function | Description |
+|---|---|
+| `silicord.task.wait(n)` | Yield for `n` seconds; returns `n` |
+| `silicord.task.spawn(f, ...)` | Run `f` in a new coroutine immediately |
+| `silicord.task.defer(f, ...)` *(v1.0.0+)* | Run `f` on the next scheduler cycle — avoids stack overflows in recursive patterns |
+| `silicord.task.delay(n, f, ...)` *(v1.0.0+)* | Call `f(...)` after `n` seconds without blocking the caller |
+
 ```lua
+-- Pause inside any coroutine
 silicord.task.wait(2)
 
+-- Fire and forget a background thread
 silicord.task.spawn(function()
     silicord.task.wait(5)
     print("5 seconds later")
+end)
+
+-- v1.0.0+: defer — runs after the current frame completes
+silicord.task.defer(function()
+    print("deferred to next cycle")
+end)
+
+-- v1.0.0+: delay — clean one-shot timer
+silicord.task.delay(10, function()
+    print("10 seconds have passed!")
+end)
+
+-- Practical: send a temp message that auto-deletes
+client:CreateCommand("temp", function(message, args)
+    message:Reply("This will disappear in 5 seconds!")
+    silicord.task.delay(5, function()
+        message:Delete()
+    end)
 end)
 ```
 
@@ -527,7 +846,7 @@ end)
 
 -- !timeout @user 60 spamming
 client:CreateCommand("timeout", function(message, args)
-    local member = message:GetMember()  -- or guild:GetMember(id)
+    local member = message:GetMember()
     member:Timeout(60, args.raw)
     message:Reply("User timed out for 60 seconds.")
 end)
@@ -550,13 +869,23 @@ client:CreateCommand("event", function(message, args)
     message:Reply("Event created!")
 end)
 
--- !vote (buttons)
+-- !vote (buttons — v1.0.0+ OOP style)
 client:CreateCommand("vote", function(message, args)
-    local row = silicord.ActionRow(
-        silicord.Button({ label = "Yes", style = "success", custom_id = "vote_yes" }),
-        silicord.Button({ label = "No",  style = "danger",  custom_id = "vote_no"  })
-    )
-    message:Reply("Cast your vote!", nil, { row })
+    local yes = silicord.Instance.new("Button")
+    yes.Label    = "Yes"
+    yes.Style    = "success"
+    yes.CustomId = "vote_yes"
+
+    local no = silicord.Instance.new("Button")
+    no.Label    = "No"
+    no.Style    = "danger"
+    no.CustomId = "vote_no"
+
+    local row = silicord.Instance.new("ActionRow")
+    row:Add(yes)
+    row:Add(no)
+
+    message:Reply("Cast your vote!", nil, { row:Build() })
 end)
 
 client:CreateComponent("vote_yes", function(interaction)
@@ -567,7 +896,22 @@ client:CreateComponent("vote_no", function(interaction)
     interaction:Update("You voted **No**! ❌")
 end)
 
--- /ping (slash)
+-- DataStore: persistent score counter (v1.0.0+)
+local db = silicord.DataStore("scores")
+client:CreateCommand("score", function(message, args)
+    local new = db:IncrementAsync(message.author.id, 1)
+    message:Reply("Your score: **" .. new .. "**")
+end)
+
+-- Auto-delete temp message using task.delay (v1.0.0+)
+client:CreateCommand("temp", function(message, args)
+    message:Reply("This disappears in 5 seconds!")
+    silicord.task.delay(5, function()
+        message:Delete()
+    end)
+end)
+
+-- /ping (slash command)
 client:CreateSlashCommand("ping", {
     description = "Replies with pong"
 }, function(interaction, args)
@@ -594,13 +938,15 @@ MIT: see [LICENSE](LICENSE)
 ---
 
 ## Version History
-- **v0.4.3** - Added nice favicon
-- **v0.4.2** - Fixed typo in `README.md`
-- **v0.4.1** - Added new website: https://silicord.github.io/
-- **v0.4.0** - Added custom error handling for bots via `client.OnError`
-- **v0.3.3** - Minor bug fixes and improvements
-- **v0.3.2** - Introduced token validation before startup
-- **v0.3.1** - Introduced better error messages for easier debugging.
+
+- **v1.0.0** — DataStore safety (atomic writes, corrupt JSON backup, safe `IncrementAsync`); `Color3` objects accepted directly in all color fields (no `:ToInt()` required); `task.defer()` and `task.delay()` added; `Instance.new("SelectMenu")` and `Instance.new("ActionRow")` OOP classes added; `silicord.Embed()`, `silicord.Button()`, `silicord.SelectMenu()`, and `silicord.ActionRow()` deprecated with runtime warnings
+- **v0.4.3** — Added nice favicon
+- **v0.4.2** — Fixed typo in `README.md`
+- **v0.4.1** — Added new website: https://silicord.github.io/
+- **v0.4.0** — Added custom error handling for bots via `client.OnError`
+- **v0.3.3** — Minor bug fixes and improvements
+- **v0.3.2** — Introduced token validation before startup
+- **v0.3.1** — Introduced better error messages for easier debugging
 - **v0.3.0** — Member object with `:Kick()`, `:Ban()`, `:Timeout()`, `:RemoveTimeout()`, `:GiveRole()`, `:RemoveRole()`, `:SetNickname()`, `:ResetNickname()`, `:SendDM()`; expanded channel types (stage, forum, media, announcement, category); channel/role editing and deletion; scheduled events (`guild:CreateEvent()`, `:EditEvent()`, `:DeleteEvent()`, `:GetEvents()`); `message:Send()` for no-ping messages; `message:Edit()` to edit bot messages; `message:Pin()` / `message:Unpin()`; `message:GetMember()` and `interaction:GetMember()`; `guild:Edit()` to edit the server; removed confusing internal gateway log
 - **v0.2.2** — Automatic sharding, buttons & select menus (`silicord.Button`, `silicord.SelectMenu`, `silicord.ActionRow`, `client:CreateComponent`), rate limit bucket controller with auto-retry, state caching (`client.cache`), middleware system (`client:AddMiddleware`)
 - **v0.2.0** — Guild object (`message:GetGuild()`), reactions (`message:React()`), embeds (`silicord.Embed()`), DMs (`message:SendPrivateMessage()`), prefix command arguments (`args[1]`, `args.raw`), slash commands (`client:CreateSlashCommand()`), `task.wait()` support in commands
