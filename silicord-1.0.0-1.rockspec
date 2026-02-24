@@ -5,7 +5,7 @@ source = {
     tag = "v1.0.0"  -- point to the new tag
 }
 description = {
-   summary = "A Discord API wrapper for Lua with Luau-inspired syntax.",
+   summary = "A Discord bot library for Lua with Luau-inspired syntax and modern support.",
    detailed = [[
       Silicord allows Roblox developers to create Discord bots using familiar syntax while bridging the gap between Luau and standard Lua. Check out the official homepage at https://silicord.github.io/
    ]],
