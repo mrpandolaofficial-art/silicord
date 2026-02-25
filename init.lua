@@ -1449,6 +1449,7 @@ local function start_shard(token, shard_id, total_shards, client)
             local head = conn:receive(2)
             if not head then
                 log_error(string.format("Shard %d lost connection.", shard_id))
+                os.exit(1)
                 break
             end
             local b1, b2      = string.byte(head, 1, 2)
