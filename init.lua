@@ -17,9 +17,9 @@ local silicord = {}
 silicord._clients = {}
 silicord._VERSION = "1.0.1"
 
--- ============================================================
--- 1. Internal Helpers
--- ============================================================
+
+-- Internal Helpers
+
 local function log_info(message)
     print(string.format("\27[1;35mINFO    %s silicord: %s\27[0m", os.date("%H:%M:%S"), message))
 end
@@ -128,9 +128,9 @@ local function send_close_frame(conn)
     )
 end
 
--- ============================================================
--- 2. Task Scheduler
--- ============================================================
+
+-- Task Scheduler
+
 silicord.task = {
     wait = function(n)
         copas.pause(n or 0)
@@ -155,9 +155,9 @@ silicord.task = {
     end,
 }
 
--- ============================================================
--- 3. Signal System
--- ============================================================
+
+-- Signal System
+
 local Signal = {}
 Signal.__index = Signal
 
@@ -203,9 +203,9 @@ end
 
 silicord.Signal = { new = Signal.new }
 
--- ============================================================
--- 4. Color3 Class
--- ============================================================
+
+-- Color3 Class
+
 local Color3 = {}
 Color3.__index = Color3
 
@@ -234,9 +234,9 @@ end
 
 silicord.Color3 = Color3
 
--- ============================================================
--- 5. Standard Library Parity
--- ============================================================
+
+-- Standard Library Parity
+
 silicord.math = {
     clamp = function(n, min, max)
         return math.max(min, math.min(max, n))
@@ -307,9 +307,9 @@ silicord.string = {
     end
 }
 
--- ============================================================
--- 6. DataStore (JSON file-based persistence)
--- ============================================================
+
+-- DataStore (JSON file)
+
 local DataStore   = {}
 DataStore.__index = DataStore
 local _ds_cache   = {}
@@ -423,9 +423,9 @@ function DataStore:GetKeys()
     return silicord.table.keys(self._data)
 end
 
--- ============================================================
--- 7. CollectionService (Tag Registry)
--- ============================================================
+
+-- CollectionService (Tag)
+
 local _tag_registry = {}
 local _object_tags  = {}
 
@@ -461,9 +461,9 @@ silicord.CollectionService = {
     end
 }
 
--- ============================================================
--- 8. Instance.new() — OOP constructors
--- ============================================================
+
+-- Instance.new() — OOP constructors like Roblox
+
 local EmbedInstance   = {}
 EmbedInstance.__index = EmbedInstance
 
@@ -602,9 +602,9 @@ silicord.Instance = {
     end
 }
 
--- ============================================================
--- 9. [DEPRECATED] Legacy table-syntax helpers
--- ============================================================
+
+-- [DEPRECATED] Legacy table-syntax helpers maybe removed in v1.2.x or later
+
 function silicord.Embed(data)
     log_deprecated("silicord.Embed({ ... })", 'silicord.Instance.new("Embed")')
     local embed = {}
@@ -666,9 +666,9 @@ function silicord.ActionRow(...)
     return { type = 1, components = components }
 end
 
--- ============================================================
--- 10. Rate Limit Bucket Controller
--- ============================================================
+
+-- Rate Limit Bucket Controller
+
 local _rate_limit_pause = 0
 
 local function make_request_sync(token, url, method, body, _retry_count)
@@ -733,9 +733,8 @@ local function make_request(token, url, method, body)
     end)
 end
 
--- ============================================================
--- 11. Token Validator
--- ============================================================
+
+-- Token Validator for Checking
 local function validate_credentials(token, app_id)
     local https  = require("ssl.https")
     local result = {}
@@ -769,18 +768,14 @@ local function validate_credentials(token, app_id)
     return true
 end
 
--- ============================================================
--- 12. Slash Command Option Types
--- ============================================================
+-- Slash Command Option Types (SCOT)
 local OPTION_TYPES = {
     string  = 3, integer = 4, bool    = 5,
     boolean = 5, user    = 6, channel = 7,
     role    = 8, number  = 10, any    = 3
 }
 
--- ============================================================
--- 13. Member Object
--- ============================================================
+-- Member Object and Actions
 local Member   = {}
 Member.__index = Member
 
@@ -878,9 +873,7 @@ function Member:SendDM(text, embed)
     end)
 end
 
--- ============================================================
--- 14. Guild Object
--- ============================================================
+-- Guild Object and Actions
 local Guild   = {}
 Guild.__index = Guild
 
@@ -1055,9 +1048,7 @@ function Guild:Edit(options)
     return data
 end
 
--- ============================================================
--- 15. Interaction Object
--- ============================================================
+-- Interaction Object for Slash commands
 local Interaction   = {}
 Interaction.__index = Interaction
 
@@ -1152,9 +1143,7 @@ function Interaction:SendPrivateMessage(text, embed)
     end)
 end
 
--- ============================================================
--- 16. Message Object
--- ============================================================
+-- Message Object for OnMessage and prefix cmds
 local Message   = {}
 Message.__index = Message
 
@@ -1289,9 +1278,7 @@ function Message:SendPrivateMessage(text, embed)
     end)
 end
 
--- ============================================================
--- 17. Shard Gateway
--- ============================================================
+-- Shard gateway connecting and register slash commands
 local function register_slash_commands(token, app_id, pending_slash)
     for _, pending in ipairs(pending_slash) do
         local api_options = {}
@@ -1517,9 +1504,9 @@ local function start_shard(token, shard_id, total_shards, client)
     end)
 end
 
--- ============================================================
--- 18. Connect
--- ============================================================
+
+-- Connecting bot and settings
+
 function silicord.Connect(config)
     local token  = config.token
     local prefix = config.prefix or "!"
@@ -1598,10 +1585,9 @@ function silicord.Connect(config)
     return client
 end
 
--- ============================================================
--- 19. Run
--- Fix #18: tostring(err) before :match() handles non-string errors
--- ============================================================
+
+-- Run bot and close frame
+
 function silicord.Run()
     log_info("Engine running...")
     local ok, err = pcall(copas.loop)

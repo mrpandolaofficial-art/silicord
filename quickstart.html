@@ -39,15 +39,15 @@
 
   <!-- PAGE HERO -->
   <section class="page-hero">
-    <div class="section-label reveal">Get up and running</div>
+    <div class="section-label reveal">Time to Code</div>
     <h1 class="page-title reveal">Quickstart</h1>
-    <p class="page-sub reveal">From zero to a live Discord bot in under a minute.</p>
+    <p class="page-sub reveal">Get up and start coding your first bot with silicord.</p>
   </section>
 
   <!-- REQUIREMENTS -->
   <section class="qs-section">
     <h2 class="qs-heading reveal">Requirements</h2>
-    <p class="qs-desc reveal">These are installed automatically when you install silicord via LuaRocks, so you normally don't need to worry about them.</p>
+    <p class="qs-desc reveal">These are installed automatically when you install silicord via LuaRocks.</p>
     <div class="req-grid reveal">
       <div class="req-card">
         <span class="req-name">Lua</span>
@@ -81,7 +81,7 @@
         <div class="qs-num">01</div>
         <div class="qs-content">
           <h3>Install via LuaRocks</h3>
-          <p>Run this in your terminal. All dependencies are pulled in automatically.</p>
+          <p>Run this in your terminal first to get silicord installed.</p>
           <div class="code-block">
             <div class="code-header">
               <span class="code-lang">bash</span>
@@ -96,7 +96,7 @@
         <div class="qs-num">02</div>
         <div class="qs-content">
           <h3>Create your bot file</h3>
-          <p>Make a new file called <code>bot.lua</code> and paste this. It's a fully working bot already.</p>
+          <p>Make a new file called <code>bot.lua</code> or whatever you like and paste this. This is a simple bot and you can expand it later.</p>
           <div class="code-block">
             <div class="code-header">
               <span class="code-lang">lua</span>
@@ -108,7 +108,7 @@ local client = silicord.Connect({
 })
 
 client:CreateCommand("ping", function(message, args)
-    message:Reply("Pong!")
+    message:Reply("Pong")
 end)
 
 silicord.Run()'>copy</button>
@@ -121,7 +121,7 @@ silicord.Run()'>copy</button>
 })
 
 client:<span class="fn">CreateCommand</span>(<span class="str">"ping"</span>, <span class="kw">function</span>(message, args)
-    message:<span class="fn">Reply</span>(<span class="str">"Pong!"</span>)
+    message:<span class="fn">Reply</span>(<span class="str">"Pong"</span>)
 <span class="kw">end</span>)
 
 silicord.<span class="fn">Run</span>()</code></pre>
@@ -196,7 +196,7 @@ silicord.<span class="fn">Run</span>()</code></pre>
   <!-- FULL EXAMPLE -->
   <section class="qs-section">
     <h2 class="qs-heading reveal">Full example</h2>
-    <p class="qs-desc reveal">A more complete bot showing prefix commands, slash commands, embeds, buttons, middleware, and events all together.</p>
+    <p class="qs-desc reveal">Here's a more complete bot showing prefix commands, slash commands, embeds, buttons, middleware, and events all together.</p>
     <div class="code-block reveal">
       <div class="code-header">
         <span class="code-lang">lua</span>
@@ -340,7 +340,7 @@ silicord.<span class="fn">Run</span>()</code></pre>
         <div class="next-icon">📦</div>
         <div>
           <h4>Embeds</h4>
-          <p>Rich message formatting with colors, fields, thumbnails, and more.</p>
+          <p>If you want your bot to be more professional and visually appealing.</p>
         </div>
         <svg class="next-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
       </a>
@@ -348,7 +348,7 @@ silicord.<span class="fn">Run</span>()</code></pre>
         <div class="next-icon">🎛️</div>
         <div>
           <h4>Buttons &amp; Select Menus</h4>
-          <p>Build interactive bots with clickable components and dropdown menus.</p>
+          <p>Allow users to interact with your bot.</p>
         </div>
         <svg class="next-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
       </a>
@@ -356,7 +356,7 @@ silicord.<span class="fn">Run</span>()</code></pre>
         <div class="next-icon">🏰</div>
         <div>
           <h4>Guild &amp; Member management</h4>
-          <p>Kick, ban, timeout, give roles, and manage your whole server.</p>
+          <p>Recommended if you're creating a moderation bot.</p>
         </div>
         <svg class="next-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
       </a>

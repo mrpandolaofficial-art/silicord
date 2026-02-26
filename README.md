@@ -1,6 +1,6 @@
 # [silicord](https://silicord.github.io) v1.1.0
 
-A Discord bot framework for Lua with **Luau-inspired syntax**. Built for Roblox developers who want to write Discord bots using familiar patterns like `task.wait()`, Signals, and method chaining.
+A Discord bot framework for Lua with **Luau-inspired syntax**. Built for Roblox developers who want to write Discord bots using familiar syntax like `task.wait()`, Signals, and method chaining.
 
 ## For a more detailed and user-friendly coding experience, visit the official website at https://silicord.github.io/.
 
@@ -35,7 +35,7 @@ local client = silicord.Connect({
 })
 
 client:CreateCommand("ping", function(message, args)
-    message:Reply("Pong!")
+    message:Reply("Pong")
 end)
 
 silicord.Run()
@@ -66,7 +66,7 @@ local client = silicord.Connect({
 ### Prefix Commands
 
 ```lua
--- Basic command
+-- basic prefix command
 client:CreateCommand("ping", function(message, args)
     message:Reply("Pong!")
 end)
@@ -91,7 +91,7 @@ end)
 
 ### Slash Commands
 
-Slash commands require `app_id` in your Connect config.
+Slash commands require `app_id` in your Connect config or it won't work.
 
 ```lua
 client:CreateSlashCommand("ban", {
@@ -101,6 +101,7 @@ client:CreateSlashCommand("ban", {
         { name = "reason", description = "Reason for the ban", type = "string", required = false }
     }
 }, function(interaction, args)
+    -- you would do the ban action, in this case args.user:Ban(args.reason or None)
     interaction:Reply("Banned " .. args.user .. ". Reason: " .. (args.reason or "none"))
 end)
 ```
@@ -143,7 +144,7 @@ end)
 
 -- Send without pinging
 client:CreateCommand("announce", function(message, args)
-    message:Send("📢 " .. args.raw)
+    message:Send("Announcement: " .. args.raw)
 end)
 ```
 
@@ -234,7 +235,7 @@ interaction.channel_id -- the channel ID
 
 ### ✅ OOP API — recommended (v1.0.0+)
 
-Use `silicord.Instance.new("Embed")` for a clean builder. Pass a `Color3` object directly to `.Color` — no `:ToInt()` required.
+Use `silicord.Instance.new("Embed")` for a clean builder. Pass a `Color3` object directly to `.Color`.
 
 ```lua
 local embed = silicord.Instance.new("Embed")
