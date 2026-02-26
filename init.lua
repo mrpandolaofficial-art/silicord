@@ -1,88 +1,6 @@
 --[[
     silicord — v1.1.0
     A Roblox-flavored Lua Discord bot framework.
-
-    BUG FIXES (v1.1.0) — 18 patches total
-    ───────────────────────────────────────
-    #1  MESSAGE_CREATE — OnMessage never fired for plain (non-prefix) messages.
-        The entire dispatch block was gated behind the prefix check, so any
-        message without the bot prefix was silently dropped.
-        Fix: moved the OnMessage:Fire into a proper else branch.
-
-    #2  MESSAGE_CREATE — nil crash on messages with no author.
-        Webhook messages and some system messages have no author field.
-        `msg.author.bot` would throw "attempt to index nil".
-        Fix: guard with `if msg.author and not msg.author.bot` before dispatch.
-
-    #3  Signal:Fire — mutating listeners list during iteration.
-        If a listener called :Disconnect() on itself inside the callback,
-        it mutated self._listeners mid-ipairs, skipping the next listener.
-        Fix: iterate over a shallow snapshot copy of _listeners.
-
-    #4  Signal:Wait — crash when called from the main thread.
-        coroutine.running() returns nil on the main thread.
-        coroutine.resume(nil, ...) throws a hard error.
-        Fix: assert coroutine.running() is non-nil with a clear message.
-
-    #5  send_frame — no header produced for payloads > 65535 bytes.
-        Large payloads silently produced a nil header, corrupting the
-        WebSocket frame and causing a silent disconnect.
-        Fix: added the 8-byte extended payload length (0xFF) branch.
-
-    #6  make_request_sync — GET requests sent a body and Content-Length: 0.
-        Some proxies/servers reject GET requests with a body.
-        Fix: only attach source/Content-Length when body is non-empty.
-
-    #7  validate_credentials — same GET-with-body issue as #6.
-        Fix: use ltn12.source.empty() for both GET requests.
-
-    #8  make_request_sync — infinite retry loop on persistent 429s.
-        If Discord kept returning 429, recursive retry would loop forever.
-        Fix: cap retries at 5; log an error and return nil on exhaustion.
-
-    #9  Interaction:Reply / :Update — embed passed as first arg was
-        misdetected. Checking only `text.title` and `text.description`
-        missed embeds that had only color/fields/footer set, treating
-        them as component arrays and sending nothing visible.
-        Fix: use an is_embed() helper that checks all known embed keys.
-
-    #10 Message:Reply / :Send / :Edit — same embed-detection issue as #9.
-        Fix: use is_embed() consistently across all send methods.
-
-    #11 ActionRowInstance:Build — empty component array sent to Discord.
-        If :Add() was never called, Discord rejects the empty array.
-        Fix: log a warning and return nil when Components is empty.
-
-    #12 silicord.ActionRow (legacy) — broken vararg flatten logic.
-        The `components[1][1]` check misfired for single-element arrays,
-        wrapping components in an extra table layer.
-        Fix: removed the broken flatten; pass the flat vararg directly.
-
-    #13 task.defer / task.delay — table.unpack is Lua 5.2+.
-        Lua 5.1 only has the global unpack().
-        Fix: compat shim `local _unpack = table.unpack or unpack`.
-
-    #14 CollectionService — no functional bug, but the _ self-discard
-        pattern was inconsistent and confusing. Cleaned up and documented.
-
-    #15 DataStore:ds_load — variable shadowing in backup block.
-        The backup io.open reused the name `f` which was already closed.
-        Fix: renamed backup file handles to `src` / `dst`.
-
-    #16 Guild:CreateRole — dead code in color branch.
-        Had `type == "string"` → hex_to_int, bypassing resolve_color(),
-        so Color3 objects passed as color were silently converted wrong.
-        Fix: always call resolve_color(color), remove the dead branch.
-
-    #17 Message:Edit — PATCH sent to wrong URL when self.id is nil.
-        Editing a message object that wasn't sent by the bot (e.g. from
-        OnMessage) produced a malformed URL with "nil" in it.
-        Fix: early-return with log_error if self.id is nil.
-
-    #18 silicord.Run — err:match() crashes on non-string error objects.
-        If copas.loop returns a table or userdata error (from a C ext),
-        calling :match() on it throws a second error, masking the original.
-        Fix: wrap with tostring(err) before calling :match().
 ]]
 
 local socket = require("socket")
@@ -93,7 +11,6 @@ local ltn12  = require("ltn12")
 
 math.randomseed(os.time())
 
--- Fix #13: Lua 5.1 / 5.2+ compat
 local _unpack = table.unpack or unpack
 
 local silicord = {}
@@ -137,7 +54,6 @@ local function resolve_color(color)
     end
 end
 
--- Fix #9 / #10: reliable embed detection using known Discord embed keys
 local _embed_keys = {
     title=true, description=true, color=true, fields=true,
     footer=true, author=true, image=true, thumbnail=true,
@@ -166,7 +82,6 @@ local function iso8601(seconds_from_now)
     return os.date("!%Y-%m-%dT%H:%M:%SZ", os.time() + seconds_from_now)
 end
 
--- Fix #5: added >65535 (8-byte extended payload length) branch
 local function send_frame(conn, payload)
     local len  = #payload
     local mask = {
@@ -224,7 +139,6 @@ silicord.task = {
     spawn = function(f, ...)
         return copas.addthread(f, ...)
     end,
-    -- Fix #13: use _unpack for Lua 5.1 compat
     defer = function(f, ...)
         local args = { ... }
         return copas.addthread(function()
@@ -267,7 +181,6 @@ function Signal:Connect(callback)
     return connection
 end
 
--- Fix #3: iterate a snapshot so mid-fire Disconnect() doesn't skip listeners
 function Signal:Fire(...)
     local snapshot = {}
     for i, cb in ipairs(self._listeners) do snapshot[i] = cb end
@@ -276,7 +189,6 @@ function Signal:Fire(...)
     end
 end
 
--- Fix #4: assert we're inside a coroutine before yielding
 function Signal:Wait()
     local thread = coroutine.running()
     assert(thread,
@@ -413,7 +325,6 @@ local function ds_load(path)
     end
     local data, _, err = json.decode(content)
     if err or type(data) ~= "table" then
-        -- Fix #15: renamed handles to src/dst (was shadowing outer `f`)
         local backup = path .. ".corrupted_" .. tostring(os.time())
         local src = io.open(path, "r")
         if src then
@@ -650,7 +561,6 @@ function ButtonInstance:Build()
     }
 end
 
--- Fix #11: return nil when no components added
 local ActionRowInstance   = {}
 ActionRowInstance.__index = ActionRowInstance
 
@@ -750,7 +660,6 @@ function silicord.SelectMenu(data)
     }
 end
 
--- Fix #12: removed broken vararg flatten; pass flat list directly
 function silicord.ActionRow(...)
     log_deprecated("silicord.ActionRow(...)", 'silicord.Instance.new("ActionRow")')
     local components = { ... }
@@ -759,8 +668,6 @@ end
 
 -- ============================================================
 -- 10. Rate Limit Bucket Controller
--- Fix #6: omit body/Content-Length for empty bodies
--- Fix #8: cap retries at 5
 -- ============================================================
 local _rate_limit_pause = 0
 
@@ -781,7 +688,6 @@ local function make_request_sync(token, url, method, body, _retry_count)
         ["Content-Type"]  = "application/json",
     }
     local source
-    -- Fix #6: only send a body when there is one
     if body and #body > 0 then
         headers["Content-Length"] = tostring(#body)
         source = ltn12.source.string(body)
@@ -800,7 +706,6 @@ local function make_request_sync(token, url, method, body, _retry_count)
     local body_str = table.concat(result)
 
     if code == 429 then
-        -- Fix #8: cap retries to prevent infinite loops
         if _retry_count >= 5 then
             log_error("Rate limit retry cap (5) reached for " .. url .. ". Giving up.")
             return nil, 429
@@ -830,7 +735,6 @@ end
 
 -- ============================================================
 -- 11. Token Validator
--- Fix #7: use ltn12.source.empty() — no body for GET requests
 -- ============================================================
 local function validate_credentials(token, app_id)
     local https  = require("ssl.https")
@@ -976,7 +880,6 @@ end
 
 -- ============================================================
 -- 14. Guild Object
--- Fix #16: always use resolve_color() — removed dead string branch
 -- ============================================================
 local Guild   = {}
 Guild.__index = Guild
@@ -1022,7 +925,6 @@ function Guild:DeleteChannel(channel_id)
     log_info("Deleted channel " .. channel_id)
 end
 
--- Fix #16: resolve_color handles all types (Color3, hex string, integer)
 function Guild:CreateRole(name, color, permissions)
     local body = { name = name }
     if color       then body.color       = resolve_color(color) end
@@ -1155,7 +1057,6 @@ end
 
 -- ============================================================
 -- 15. Interaction Object
--- Fix #9: use is_embed() for reliable embed detection
 -- ============================================================
 local Interaction   = {}
 Interaction.__index = Interaction
@@ -1253,8 +1154,6 @@ end
 
 -- ============================================================
 -- 16. Message Object
--- Fix #10: use is_embed() for embed detection
--- Fix #17: guard Message:Edit() against nil self.id
 -- ============================================================
 local Message   = {}
 Message.__index = Message
@@ -1303,7 +1202,6 @@ function Message:Send(text, embed, components)
         "POST", json.encode(payload))
 end
 
--- Fix #17: guard against nil self.id before building the PATCH URL
 function Message:Edit(text, embed, components)
     if not self.id then
         log_error("Message:Edit() — message has no id. Only bot-sent messages can be edited.")
@@ -1518,7 +1416,6 @@ local function start_shard(token, shard_id, total_shards, client)
                         end
                     end
 
-                    -- Fix #1 + #2: guard nil author; fire OnMessage for plain messages
                     if data.t == "MESSAGE_CREATE" then
                         local msg = Message.new(data.d, token, client.cache)
                         if msg.author then
@@ -1563,7 +1460,6 @@ local function start_shard(token, shard_id, total_shards, client)
                                     end
                                 end
                             else
-                                -- Fix #1: plain message (no prefix) → fire OnMessage
                                 client.OnMessage:Fire(msg)
                             end
                         end
