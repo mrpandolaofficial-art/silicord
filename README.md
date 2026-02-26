@@ -133,7 +133,7 @@ end)
 ```lua
 client:CreateCommand("info", function(message, args)
     message:React("👀")
-    -- v1.0.0+: use Instance.new("Embed") — see Embeds section
+    -- v1.0.0+: use Instance.new("Embed"): see Embeds section
     local embed = silicord.Instance.new("Embed")
     embed.Title       = "Hello!"
     embed.Description = "This is an embed."
@@ -233,7 +233,7 @@ interaction.channel_id -- the channel ID
 
 ## Embeds
 
-### ✅ OOP API — recommended (v1.0.0+)
+### ✅ OOP API: recommended (v1.0.0+)
 
 Use `silicord.Instance.new("Embed")` for a clean builder. Pass a `Color3` object directly to `.Color`.
 
@@ -271,12 +271,12 @@ message:Reply("Here's some info:", embed:Build())
 | `embed:AddField(name, value, inline)` | Add a field; returns the embed for chaining |
 | `embed:Build()` | Returns the final table to pass to `:Reply()` etc. |
 
-### ⚠️ Table syntax — deprecated (pre-v0.4.3)
+### ⚠️ Table syntax: deprecated (pre-v0.4.3)
 
 > **Deprecated since v1.0.0.** `silicord.Embed({ ... })` still works but prints a runtime warning. Migrate to `silicord.Instance.new("Embed")`. This helper will be removed in a future major version.
 
 ```lua
--- ⚠ DEPRECATED — use silicord.Instance.new("Embed") instead
+-- ⚠ DEPRECATED: use silicord.Instance.new("Embed") instead
 local embed = silicord.Embed({
     title       = "My Embed",
     description = "This is the description.",
@@ -292,7 +292,7 @@ message:Reply(embed)
 
 ## Color3 (v1.0.0+)
 
-A Roblox-style color class. In v1.0.0+, `Color3` objects can be passed directly to any color field — no `:ToInt()` needed.
+A Roblox-style color class. In v1.0.0+, `Color3` objects can be passed directly to any color field: no `:ToInt()` needed.
 
 ```lua
 -- Create from RGB values (0–255)
@@ -301,7 +301,7 @@ local c = silicord.Color3.fromRGB(88, 101, 242)
 -- Create from a hex string
 local c = silicord.Color3.fromHex("#5865F2")
 
--- Use directly in an embed — no :ToInt() required
+-- Use directly in an embed: no :ToInt() required
 local embed = silicord.Instance.new("Embed")
 embed.Color = silicord.Color3.fromHex("#57F287")
 
@@ -323,7 +323,7 @@ local int = c:ToInt()   -- 5793522
 
 ## Components (Buttons & Select Menus)
 
-### ✅ OOP API — recommended (v1.0.0+)
+### ✅ OOP API: recommended (v1.0.0+)
 
 ```lua
 client:CreateCommand("vote", function(message, args)
@@ -401,7 +401,7 @@ row:Add(menu)
 local built = row:Build()
 ```
 
-### ⚠️ Table syntax — deprecated (pre-v0.4.3)
+### ⚠️ Table syntax: deprecated (pre-v0.4.3)
 
 > **Deprecated since v1.0.0.** These helpers still work but emit a yellow runtime warning. Migrate to the OOP API above.
 
@@ -479,11 +479,11 @@ local guild = message:GetGuild()
 
 | Method | Description |
 |--------|-------------|
-| `guild:CreateChannel(name, kind, options)` | Create a channel — see channel types below |
+| `guild:CreateChannel(name, kind, options)` | Create a channel: see channel types below |
 | `guild:EditChannel(channel_id, options)` | Edit an existing channel |
 | `guild:DeleteChannel(channel_id)` | Delete a channel |
-| `guild:CreateRole(name, color, permissions)` | Create a role — `color` accepts hex string, integer, or Color3 |
-| `guild:EditRole(role_id, options)` | Edit an existing role — `options.color` accepts hex, integer, or Color3 |
+| `guild:CreateRole(name, color, permissions)` | Create a role: `color` accepts hex string, integer, or Color3 |
+| `guild:EditRole(role_id, options)` | Edit an existing role: `options.color` accepts hex, integer, or Color3 |
 | `guild:DeleteRole(role_id)` | Delete a role |
 | `guild:GetMembers(limit)` | Returns a list of Member objects |
 | `guild:GetMember(user_id)` | Returns a single Member object |
@@ -563,7 +563,7 @@ JSON file-based key-value persistence. Each store maps to a `<name>.datastore.js
 **v1.0.0 safety improvements:**
 - Empty or missing JSON files start as a fresh store instead of crashing.
 - Corrupt JSON is automatically backed up to `name.datastore.json.corrupted_<timestamp>` and the store resets.
-- All writes use an atomic temp-file swap — a crash mid-write can never corrupt your data.
+- All writes use an atomic temp-file swap: a crash mid-write can never corrupt your data.
 - `IncrementAsync` resets non-numeric values to `0` with a warning instead of throwing an error.
 
 ```lua
@@ -686,7 +686,7 @@ local copy = silicord.table.copy(someTable)
 
 ## CollectionService
 
-A Roblox-style tag registry. Attach string tags to any Lua value and query them later — useful for flagging users, channels, or custom objects.
+A Roblox-style tag registry. Attach string tags to any Lua value and query them later: useful for flagging users, channels, or custom objects.
 
 ```lua
 local cs = silicord.CollectionService
@@ -774,7 +774,7 @@ Sharding is fully automatic. silicord fetches the recommended shard count from D
 |---|---|
 | `silicord.task.wait(n)` | Yield for `n` seconds; returns `n` |
 | `silicord.task.spawn(f, ...)` | Run `f` in a new coroutine immediately |
-| `silicord.task.defer(f, ...)` *(v1.0.0+)* | Run `f` on the next scheduler cycle — avoids stack overflows in recursive patterns |
+| `silicord.task.defer(f, ...)` *(v1.0.0+)* | Run `f` on the next scheduler cycle: avoids stack overflows in recursive patterns |
 | `silicord.task.delay(n, f, ...)` *(v1.0.0+)* | Call `f(...)` after `n` seconds without blocking the caller |
 
 ```lua
@@ -787,12 +787,12 @@ silicord.task.spawn(function()
     print("5 seconds later")
 end)
 
--- v1.0.0+: defer — runs after the current frame completes
+-- v1.0.0+: defer: runs after the current frame completes
 silicord.task.defer(function()
     print("deferred to next cycle")
 end)
 
--- v1.0.0+: delay — clean one-shot timer
+-- v1.0.0+: delay: clean one-shot timer
 silicord.task.delay(10, function()
     print("10 seconds have passed!")
 end)
@@ -872,7 +872,7 @@ client:CreateCommand("event", function(message, args)
     message:Reply("Event created!")
 end)
 
--- !vote (buttons — v1.0.0+ OOP style)
+-- !vote (buttons: v1.0.0+ OOP style)
 client:CreateCommand("vote", function(message, args)
     local yes = silicord.Instance.new("Button")
     yes.Label    = "Yes"
@@ -943,16 +943,16 @@ MIT: see [LICENSE](LICENSE)
 ## Version History
 
 - **v1.1.0** - Multi-bug patch, fixed `WebSocket` connection issues, improved error handling, and various optimizations.
-- **v1.0.0** — DataStore safety (atomic writes, corrupt JSON backup, safe `IncrementAsync`); `Color3` objects accepted directly in all color fields (no `:ToInt()` required); `task.defer()` and `task.delay()` added; `Instance.new("SelectMenu")` and `Instance.new("ActionRow")` OOP classes added; `silicord.Embed()`, `silicord.Button()`, `silicord.SelectMenu()`, and `silicord.ActionRow()` deprecated with runtime warnings
-- **v0.4.3** — Added nice favicon
-- **v0.4.2** — Fixed typo in `README.md`
-- **v0.4.1** — Added new website: https://silicord.github.io/
-- **v0.4.0** — Added custom error handling for bots via `client.OnError`
-- **v0.3.3** — Minor bug fixes and improvements
-- **v0.3.2** — Introduced token validation before startup
-- **v0.3.1** — Introduced better error messages for easier debugging
-- **v0.3.0** — Member object with `:Kick()`, `:Ban()`, `:Timeout()`, `:RemoveTimeout()`, `:GiveRole()`, `:RemoveRole()`, `:SetNickname()`, `:ResetNickname()`, `:SendDM()`; expanded channel types (stage, forum, media, announcement, category); channel/role editing and deletion; scheduled events (`guild:CreateEvent()`, `:EditEvent()`, `:DeleteEvent()`, `:GetEvents()`); `message:Send()` for no-ping messages; `message:Edit()` to edit bot messages; `message:Pin()` / `message:Unpin()`; `message:GetMember()` and `interaction:GetMember()`; `guild:Edit()` to edit the server; removed confusing internal gateway log
-- **v0.2.2** — Automatic sharding, buttons & select menus (`silicord.Button`, `silicord.SelectMenu`, `silicord.ActionRow`, `client:CreateComponent`), rate limit bucket controller with auto-retry, state caching (`client.cache`), middleware system (`client:AddMiddleware`)
-- **v0.2.0** — Guild object (`message:GetGuild()`), reactions (`message:React()`), embeds (`silicord.Embed()`), DMs (`message:SendPrivateMessage()`), prefix command arguments (`args[1]`, `args.raw`), slash commands (`client:CreateSlashCommand()`), `task.wait()` support in commands
-- **v0.1.0** — silicord prototype released, basic `:Reply()` syntax, WebSocket gateway connection
-- **v0.0.2** — Fixed WebSocket frame masking
+- **v1.0.0**: DataStore safety (atomic writes, corrupt JSON backup, safe `IncrementAsync`); `Color3` objects accepted directly in all color fields (no `:ToInt()` required); `task.defer()` and `task.delay()` added; `Instance.new("SelectMenu")` and `Instance.new("ActionRow")` OOP classes added; `silicord.Embed()`, `silicord.Button()`, `silicord.SelectMenu()`, and `silicord.ActionRow()` deprecated with runtime warnings
+- **v0.4.3**: Added nice favicon
+- **v0.4.2**: Fixed typo in `README.md`
+- **v0.4.1**: Added new website: https://silicord.github.io/
+- **v0.4.0**: Added custom error handling for bots via `client.OnError`
+- **v0.3.3**: Minor bug fixes and improvements
+- **v0.3.2**: Introduced token validation before startup
+- **v0.3.1**: Introduced better error messages for easier debugging
+- **v0.3.0**: Member object with `:Kick()`, `:Ban()`, `:Timeout()`, `:RemoveTimeout()`, `:GiveRole()`, `:RemoveRole()`, `:SetNickname()`, `:ResetNickname()`, `:SendDM()`; expanded channel types (stage, forum, media, announcement, category); channel/role editing and deletion; scheduled events (`guild:CreateEvent()`, `:EditEvent()`, `:DeleteEvent()`, `:GetEvents()`); `message:Send()` for no-ping messages; `message:Edit()` to edit bot messages; `message:Pin()` / `message:Unpin()`; `message:GetMember()` and `interaction:GetMember()`; `guild:Edit()` to edit the server; removed confusing internal gateway log
+- **v0.2.2**: Automatic sharding, buttons & select menus (`silicord.Button`, `silicord.SelectMenu`, `silicord.ActionRow`, `client:CreateComponent`), rate limit bucket controller with auto-retry, state caching (`client.cache`), middleware system (`client:AddMiddleware`)
+- **v0.2.0**: Guild object (`message:GetGuild()`), reactions (`message:React()`), embeds (`silicord.Embed()`), DMs (`message:SendPrivateMessage()`), prefix command arguments (`args[1]`, `args.raw`), slash commands (`client:CreateSlashCommand()`), `task.wait()` support in commands
+- **v0.1.0**: silicord prototype released, basic `:Reply()` syntax, WebSocket gateway connection
+- **v0.0.2**: Fixed WebSocket frame masking
