@@ -292,7 +292,7 @@ message:Reply(embed)
 
 ## Color3 (v1.0.0+)
 
-A Roblox-style color class. In v1.0.0+, `Color3` objects can be passed directly to any color field: no `:ToInt()` needed.
+A Roblox-style color class. In v1.0.0+, `Color3` objects can be passed directly to any color field.
 
 ```lua
 -- Create from RGB values (0–255)

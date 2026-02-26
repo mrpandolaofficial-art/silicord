@@ -45,4 +45,4 @@ end)
 --[[ silicord provides native support and treats both 
 prefix and slash commands equally ]]
 
--- try making a command called !hello which replied "Hi"
+-- try making a command called !hello which replies "Hi" below this line
