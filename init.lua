@@ -11,7 +11,7 @@ local ltn12  = require("ltn12")
 
 math.randomseed(os.time())
 
-local _unpack = table.unpack or unpack
+local _unpack = table.unpack or unpack -- nts: Lua 5.1 compatibility
 
 local silicord = {}
 silicord._clients = {}
