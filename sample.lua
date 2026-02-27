@@ -4,21 +4,21 @@ You can run this script after installing silicord via LuaRocks.
 Make sure to replace your bot token and other necessary 
 information like prefixes and app ID.]]
 
-local silicord = require("silicord") -- always require the library at the top
+local discord = require("silicord") -- always require the library at the top
 
-silicord.Connect({ -- provide necessary connection details
+discord.Connect({ -- provide necessary connection details
     token = "YourBotTokenHere", -- replace with your bot token
     prefix = "!", -- replace with your desired command prefix
     app_id = "YourAppIDHere", -- replace with your application ID; this is required for slash commands
 })
 
 -- simple command !ping
-silicord:CreateCommand("ping", function(message, args)
+discord:CreateCommand("ping", function(message, args)
     message:reply("Pong!")
 end)
 
 -- simple slash command /echo {text}
-silicord:CreateSlashCommand("echo", {
+discord:CreateSlashCommand("echo", {
     description = "Echoes back the provided text",
     options = {
         { name = "text", description = "The text to echo back", type = "string", required = true }
@@ -27,8 +27,8 @@ silicord:CreateSlashCommand("echo", {
     interaction:Reply(args.text) -- replies with the text provided by the user
 end)
 
-silicord:CreateCommand("help", function(message, args)
-    local embed = silicord.Embed({ -- note that using silicord.Embed({}) is deprecated, you can simply use silicord.Instance.new("Embed") instead.
+discord:CreateCommand("help", function(message, args)
+    local embed = discord.Embed({ -- note that using discord.Embed({}) is deprecated, you can simply use discord.Instance.new("Embed") instead.
         title = "Help",
         description = "Here are the available commands:",
         fields = {
