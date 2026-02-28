@@ -25,3 +25,10 @@
 
     -- command logic below
     ```
+    
+- Allow `:Reply()` and `:Send()` to return the message object. For example
+    ```lua
+    local response = message:Reply("Here is my message!")
+    silicord.task.wait(2)
+    response:Edit("This message has been edited now!")
+    ```
